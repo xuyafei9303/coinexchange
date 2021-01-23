@@ -60,6 +60,7 @@
             <artifactId>springside-utils</artifactId>
         </dependency>
 
+<!--        服务远程调用-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>

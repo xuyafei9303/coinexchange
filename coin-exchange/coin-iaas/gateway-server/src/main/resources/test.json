@@ -1,0 +1,20 @@
+[
+  {
+    "apiName": "admin-service-api",
+    "predicateItems": [
+      {
+        "pattern": "/admin/login",
+        "matchStrategy": 0
+      }
+    ]
+  },
+  {
+    "apiName": "xxx-service-api",
+    "predicateItems": [
+      {
+        "pattern": "/admin/export",
+        "matchStrategy": 0
+      }
+    ]
+  }
+]
