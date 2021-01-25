@@ -46,6 +46,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
         }
         UserDetails userDetails = null;
         try {
+            final String grant_token = requestAttributes.getRequest().getParameter("grant_type"); // refresh_token
+            if (LoginConstant.REFRESH_TYPE.equals(grant_token.toUpperCase())) {
+                username = adJustUsername(username, login_type);
+            }
             switch (login_type) {
                 case LoginConstant.ADMIN_TYPE:
                     userDetails = loadSysUserByUsername(username);
@@ -60,6 +64,24 @@ public class UserDetailServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("该用户不存在: " + username);
         }
         return userDetails;
+    }
+
+    /**
+     * 纠正用户的名称
+     * @param username 用户的id
+     * @param login_type admin_type or member_type
+     * @return
+     */
+    private String adJustUsername(String username, String login_type) {
+        if (LoginConstant.ADMIN_TYPE.equals(login_type)) {
+            // 管理员的纠正方式
+            return jdbcTemplate.queryForObject(LoginConstant.QUERY_ADMIN_USER_WITH_ID_SQL, String.class, username);
+        }
+        if (LoginConstant.MEMBER_TYPE.equals(login_type)) {
+            // 会员的纠正方式
+            return jdbcTemplate.queryForObject(LoginConstant.QUERY_MEMBER_USER_WITH_ID_SQL, String.class, username);
+        }
+        return username;
     }
 
     /**

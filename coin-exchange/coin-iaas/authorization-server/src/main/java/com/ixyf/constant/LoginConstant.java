@@ -20,6 +20,8 @@ public class LoginConstant {
      */
     public static final String ADMIN_ROLE_CODE = "ROLE_ADMIN";
 
+    public static final String REFRESH_TYPE = "REFRESH_TOKEN";
+
     /**
      * 使用用户名查询后台用户
      */
@@ -54,5 +56,17 @@ public class LoginConstant {
      */
     public static final String QUERY_MEMBER_SQL =
             "SELECT `id`, `password`, `status` FROM `user` WHERE `mobile` = ? OR `email` = ?" ;
+
+    /**
+     * 使用后台用户的id查询用户名称
+     */
+    public static final String QUERY_ADMIN_USER_WITH_ID_SQL =
+            "SELECT `username` FROM sys_user WHERE id = ?" ;
+
+    /**
+     * 使用会员用户的id查询用户mobile
+     */
+    public static final String QUERY_MEMBER_USER_WITH_ID_SQL =
+            "SELECT `mobile` FROM user WHERE id = ? " ;
 
 }

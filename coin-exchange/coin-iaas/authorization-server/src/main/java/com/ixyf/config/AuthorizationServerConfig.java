@@ -45,8 +45,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .withClient("coin-api") // 第三方客户端的名称
                 .secret(passwordEncoder.encode("coin-secret")) // 第三方客户端的秘钥
                 .scopes("all") // 第三方客户端的授权范围
-                .accessTokenValiditySeconds(3600) // token的有效期
-                .refreshTokenValiditySeconds(7 * 3600); // refreshToken的有效期
+                .authorizedGrantTypes("password", "refresh_token")
+                .accessTokenValiditySeconds(7 * 24 * 3600) // token的有效期
+                .refreshTokenValiditySeconds(30 * 24 * 3600) // refreshToken的有效期
+                .and()
+                .withClient("inside-app")
+                .secret(passwordEncoder.encode("inside-secret"))
+                .authorizedGrantTypes("client_credentials")
+                .scopes("all")
+                .accessTokenValiditySeconds(7 * 24 * 3600);
         super.configure(clients);
     }
 
