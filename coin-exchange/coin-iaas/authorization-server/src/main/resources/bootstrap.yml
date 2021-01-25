@@ -7,3 +7,13 @@ spring:
     nacos:
       discovery:
         server-addr: nacos-server:8848
+  datasource:
+    url: jdbc:mysql://mysql-server:3307/coin-exchange?useSSL=false&serverTimezon=GMT%28
+    username: root
+    password: XYF701030x
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#  redis:
+#    host: redis-server
+#    port: 6380
+#    password: XYF701030x
+#    timeout: 10000

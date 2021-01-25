@@ -41,3 +41,8 @@ spring:
           ruleType: GW_API_GROUP
       transport:
         dashboard: sentinel-server:8858
+  redis:
+    host: redis-server
+    port: 6380
+    password: XYF701030x
+    timeout: 10000
