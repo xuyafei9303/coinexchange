@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +68,26 @@ public class UserDetailServiceImpl implements UserDetailsService {
      * @return
      */
     private UserDetails loadMemberUserByUsername(String username) {
-        return  null;
+        return jdbcTemplate.queryForObject(LoginConstant.QUERY_MEMBER_SQL, new RowMapper<User>() {
+            @Override
+            public User mapRow(ResultSet resultSet, int i) throws SQLException {
+                if (resultSet.wasNull()) {
+                    throw new UsernameNotFoundException("用户:" + username + "不存在");
+                }
+                final long id = resultSet.getLong("id"); // 用户id
+                final String password = resultSet.getString("password"); // 用户密码
+                final int status = resultSet.getInt("status"); // 用户状态
+                return new User(
+                        String.valueOf(id), // 使用id代替username
+                        password,
+                        status == 1,
+                        true,
+                        true,
+                        true,
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                );
+            }
+        }, username, username);
     }
 
     /**
@@ -87,7 +107,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
                 final long id = resultSet.getLong("id"); // 用户的id
                 final String password = resultSet.getString("password"); // 用户的密码
                 final int status = resultSet.getInt("status"); // 用户的状态
-                return new User(
+                return new User( // 封装成一个userDetail对象返回
                         String.valueOf(id), // 使用id代替username
                         password,
                         status == 1,
@@ -100,9 +120,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
             }
         }, username);
 
-        // 查询这个用户对应的权限
-
-        // 封装成一个userDetail对象返回
     }
 
     /**

@@ -49,5 +49,10 @@ public class LoginConstant {
                     "ON sys_role_privilege.role_id = sys_user_role.role_id " +
                     "WHERE sys_user_role.user_id = ? ";
 
+    /**
+     * 通过手机号或者邮箱查询会员
+     */
+    public static final String QUERY_MEMBER_SQL =
+            "SELECT `id`, `password`, `status` FROM `user` WHERE `mobile` = ? OR `email` = ?" ;
 
 }
