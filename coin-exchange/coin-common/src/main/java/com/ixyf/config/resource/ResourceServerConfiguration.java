@@ -14,9 +14,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.Permission;
 
 @EnableResourceServer
 @EnableMethodCache(basePackages = "com.ixyf.service.impl")
@@ -31,11 +29,11 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers(
                         "/v2/api-docs",
-                        "/swagger-resource/configuration/ui", // 用来获取支持的动作
-                        "swagger-resource",
-                        "swagger-resource/configuration/security",
+                        "/swagger-resources/configuration/ui",//用来获取支持的动作
+                        "/swagger-resources",//用来获取api-docs的URI
+                        "/swagger-resources/configuration/security",//安全选项
                         "/webjars/**",
-                        "swagger-ui.html"
+                        "/swagger-ui.html"
 
                 ).permitAll()
                 .antMatchers("/**").authenticated()
@@ -63,7 +61,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
         final JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
         String str = null;
         try {
-            final ClassPathResource classPathResource = new ClassPathResource("coinexchange.pub");
+            final ClassPathResource classPathResource = new ClassPathResource("coinexchange.txt");
             final byte[] bytes = FileCopyUtils.copyToByteArray(classPathResource.getInputStream());
             str = new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException e) {

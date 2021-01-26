@@ -1,5 +1,6 @@
 package com.ixyf.config.swagger;
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 因为token无法在swagger ui页面进行验证，所以升级版本到2.9.2
+ */
 @Configuration
 @EnableSwagger2
 @EnableConfigurationProperties(SwaggerProperties.class)
@@ -43,7 +47,8 @@ public class SwaggerAutoConfiguration {
                 .build();
         // 安全配置
         docket.securityContexts(securityContexts()) // 安全规则上下文
-                .securitySchemes(securitySchemes()); // 安全规则
+                .securitySchemes(securitySchemes()) // 安全规则
+        ;
         return docket;
     }
 
@@ -63,7 +68,7 @@ public class SwaggerAutoConfiguration {
      */
     private List<SecurityContext> securityContexts() {
         return Collections.singletonList(new SecurityContext(
-                Collections.singletonList(new SecurityReference("", new AuthorizationScope[]{new AuthorizationScope("global", "accessResource")})),
+                Collections.singletonList(new SecurityReference("Authorization", new AuthorizationScope[]{new AuthorizationScope("global", "accessResource")})),
                 PathSelectors.any()
         ));
     }

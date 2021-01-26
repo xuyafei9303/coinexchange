@@ -105,10 +105,11 @@
             <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
-<!--        配置文件处理-->
+<!--        配置文件处理 自定义的属性可以在yml文件中有提示-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

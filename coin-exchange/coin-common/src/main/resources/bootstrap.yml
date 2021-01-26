@@ -1,0 +1,82 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: coin-common
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos-server:8848
+      config:
+        enabled: false # 暂时关闭配置config
+    sentinel:
+      transport:
+        dashboard: sentinel-server:8858
+  redis:
+    host: redis-server
+    port: 6380
+    password: XYF701030x
+    timeout: 100000
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql-server:3307/coin-exchange
+    username: root
+    password: XYF701030x
+swagger2:
+  base-package: com.ixyf.controller
+  name: xyf
+  url: www.ixyf.com
+  email: xuyafei9303@gmail.com
+  title: coin-common模块的测试
+  description: coin-common模块测试
+  version: 2.0
+  terms-of-service-url: ixyf.com
+mybatis-plus:
+  mapper-locations: classpath:/mappers/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#jetcache:
+#  statIntervalMinutes: 15
+#  areaInCacheName: false
+#  local: # 本地缓存
+#    default:
+#      type: linkedhashmap
+#      keyConvertor: fastjson
+#  remote: # 远程缓存
+#    default:
+#      type:redis
+#      keyConvertor: fastjson
+#      valueEncoder: kryo
+#      valueDecoder: kryo
+#      poolConfig:
+#        minIdle: 5
+#        maxIdle: 20
+#        maxTotal: 20
+#      host: ${spring.redis.host}
+#      port: ${spring.redis.port}
+#      password: ${spring.redis.password}
+
+jetcache:
+  statIntervalMinutes: 15   # 每隔多久统计信息的时长配置
+  areaInCacheName: false   # 是否配置前缀
+  local:
+    default:
+      type: caffeine      # 本地缓存类型
+      keyConvertor: fastjson   # key的序列化转化的协议
+      limit: 10000              # 本地缓存最大个数
+      defaultExpireInMillis: 10000   # 缓存的时间全局 默认值
+  remote:
+    default:
+      type: redis          # 缓存数据库类型
+      keyConvertor: fastjson
+      valueEncoder: kryo
+      valueDecoder: kryo
+      poolConfig:
+        minIdle: 5
+        maxIdle: 20
+        maxTotal: 20
+      host: ${spring.redis.host}
+      port: ${spring.redis.port}
+      password: ${spring.redis.password}
+      defaultExpireInMillis: 20000    # 全局缓存失效时间
+
