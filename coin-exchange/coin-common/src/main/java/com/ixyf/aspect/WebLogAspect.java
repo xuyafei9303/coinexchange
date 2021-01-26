@@ -2,10 +2,13 @@ package com.ixyf.aspect;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import com.alibaba.fastjson.JSON;
 import com.ixyf.model.WebLog;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -23,7 +26,9 @@ import java.util.Objects;
 
 @Component
 @Order(1)
-public aspect WebLogAspect {
+@Slf4j
+@Aspect
+public class WebLogAspect {
 
     /**
      * 日志记录
@@ -47,6 +52,7 @@ public aspect WebLogAspect {
         webLog.setSpendTime((int)(end - start) / 1000); // 接口请求花费的时间
         // 获取当前请求的request对象
         final ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        assert servletRequestAttributes != null;
         final HttpServletRequest request = servletRequestAttributes.getRequest();
         // 获取安全的上下文
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -64,9 +70,10 @@ public aspect WebLogAspect {
         // 获取@ApiOperation
         final ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
         webLog.setDescription(apiOperation == null ? "no desc" : apiOperation.value());
-        webLog.setMethod(clazzName + "." + method.getName()); // com.ixyf.controller.LoginController.login()
+        webLog.setMethod(clazzName + "." + method.getName() + "()"); // com.ixyf.controller.LoginController.login()
         webLog.setParameter(getMethodParameters(method, joinPoint.getArgs()));
         webLog.setResult(result);
+        log.info(JSON.toJSONString(webLog, true));
 
         return result;
     }
