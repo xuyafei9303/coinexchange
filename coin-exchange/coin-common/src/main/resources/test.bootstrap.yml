@@ -35,26 +35,6 @@ mybatis-plus:
   mapper-locations: classpath:/mappers/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-#jetcache:
-#  statIntervalMinutes: 15
-#  areaInCacheName: false
-#  local: # 本地缓存
-#    default:
-#      type: linkedhashmap
-#      keyConvertor: fastjson
-#  remote: # 远程缓存
-#    default:
-#      type:redis
-#      keyConvertor: fastjson
-#      valueEncoder: kryo
-#      valueDecoder: kryo
-#      poolConfig:
-#        minIdle: 5
-#        maxIdle: 20
-#        maxTotal: 20
-#      host: ${spring.redis.host}
-#      port: ${spring.redis.port}
-#      password: ${spring.redis.password}
 
 jetcache:
   statIntervalMinutes: 15   # 每隔多久统计信息的时长配置
