@@ -22,6 +22,8 @@ spring:
           uri: lb://admin-service # 路由目的地
           predicates: # 匹配正则
             - Path=/admin/**
+          filters:
+            - StripPrefix=1 # 当前端访问/admin/login的时候，网关会把admin自动去掉
     # 限流
     sentinel:
       datasource:
