@@ -1,7 +1,9 @@
 package com.ixyf.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ixyf.domain.SysMenu;
 import com.ixyf.domain.SysPrivilege;
+import com.ixyf.model.RolePrivilegesParam;
 import com.ixyf.service.SysMenuService;
 import com.ixyf.service.SysPrivilegeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ixyf.mapper.SysRolePrivilegeMapper;
 import com.ixyf.domain.SysRolePrivilege;
 import com.ixyf.service.SysRolePrivilegeService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
@@ -27,6 +30,9 @@ public class SysRolePrivilegeServiceImpl extends ServiceImpl<SysRolePrivilegeMap
 
     @Autowired
     private SysPrivilegeService sysPrivilegeService;
+
+    @Autowired
+    private SysRolePrivilegeService sysRolePrivilegeService;
 
     @Override
     public List<SysMenu> findSysMenuAndPrivileges(Long roleId) {
@@ -47,6 +53,33 @@ public class SysRolePrivilegeServiceImpl extends ServiceImpl<SysRolePrivilegeMap
             subMenu.addAll(getChildMenus(sysMenu.getId(), roleId, sysMenuList));
         }
         return subMenu;
+    }
+
+    /**
+     * 给角色授予权限
+     * @param privilegesParam
+     * @return
+     */
+    @Transactional
+    @Override
+    public boolean grantPrivileges(RolePrivilegesParam privilegesParam) {
+        Long roleId = privilegesParam.getRoleId();
+        // 先删除该角色之前的权限
+        sysRolePrivilegeService.remove(new LambdaQueryWrapper<SysRolePrivilege>().eq(SysRolePrivilege::getRoleId, roleId));
+        // 新增权限
+        List<Long> privilegeIds = privilegesParam.getPrivilegeIds();
+        if (CollectionUtils.isEmpty(privilegeIds)) {
+            List<SysRolePrivilege> sysRolePrivilegeList = new ArrayList<>();
+            for (Long privilegeId : privilegeIds) {
+                SysRolePrivilege sysRolePrivilege = new SysRolePrivilege();
+                sysRolePrivilege.setRoleId(privilegesParam.getRoleId());
+                sysRolePrivilege.setPrivilegeId(privilegeId);
+                sysRolePrivilegeList.add(sysRolePrivilege);
+            }
+            System.out.println("sysRolePrivilegeList = " + sysRolePrivilegeList);
+            return sysRolePrivilegeService.saveBatch(sysRolePrivilegeList);
+        }
+        return true;
     }
 
     /**

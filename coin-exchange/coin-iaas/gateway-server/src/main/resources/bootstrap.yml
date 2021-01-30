@@ -27,12 +27,6 @@ spring:
     # 限流
     sentinel:
       datasource:
-#        ds1.file:
-#          file: classpath:gw-flow.json # 网关 + api分组的限流
-#          ruleType: GW_FLOW # 定义小写会报错
-#        ds2.file:
-#          file: classpath:api-group.json # api分组的限流
-#          ruleType: GW_API_GROUP
         ds1.nacos:
           serverAddr: nacos-server:8848
           dataId: gw_flow
