@@ -38,6 +38,7 @@ public class  SysPrivilegeController {
      * @param page
      * @return
      */
+    @ApiOperation(value = "分页展示权限管理数据")
     @GetMapping
     @ApiImplicitParams({
             @ApiImplicitParam(name = "current", value = "当前页"),

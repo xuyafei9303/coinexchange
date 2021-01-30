@@ -37,6 +37,7 @@ public class SysUserController {
             @ApiImplicitParam(name = "mobile", value = "员工手机号"),
             @ApiImplicitParam(name = "fullname", value = "员工名")
     })
+    @ApiOperation(value = "分页展示员工数据")
     @GetMapping
     @PreAuthorize("hasAuthority('sys_user_query')")
     public R<Page<SysUser>> findByPage(@ApiIgnore Page<SysUser> page, String mobile, String fullname) {
