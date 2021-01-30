@@ -68,7 +68,7 @@ public class SysRolePrivilegeServiceImpl extends ServiceImpl<SysRolePrivilegeMap
         sysRolePrivilegeService.remove(new LambdaQueryWrapper<SysRolePrivilege>().eq(SysRolePrivilege::getRoleId, roleId));
         // 新增权限
         List<Long> privilegeIds = privilegesParam.getPrivilegeIds();
-        if (CollectionUtils.isEmpty(privilegeIds)) {
+        if (!CollectionUtils.isEmpty(privilegeIds)) {
             List<SysRolePrivilege> sysRolePrivilegeList = new ArrayList<>();
             for (Long privilegeId : privilegeIds) {
                 SysRolePrivilege sysRolePrivilege = new SysRolePrivilege();
