@@ -4,19 +4,12 @@ spring:
       server-addr: nacos-server:8848
       config:
         file-extension: yaml
+
   application:
     name: admin-service
   profiles:
     active: dev # 开发环境
 # 配合文件的dataId：nacos-server:8840/admin-service-dev.yaml
 
-#请求处理的超时时间
-feign:
-  client:
-    config:
-      default:
-        #建立连接所用的时间，适用于网络状况正常的情况下，两端连接所需要的时间
-        ConnectTimeOut: 10000
-        #指建立连接后从服务端读取到可用资源所用的时间
-        ReadTimeOut: 10000
+
 

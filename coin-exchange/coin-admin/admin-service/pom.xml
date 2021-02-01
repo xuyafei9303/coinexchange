@@ -23,6 +23,22 @@
             <artifactId>coin-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+<!--        阿里云对象存储-->
+<!--
+用户登录名称 coin-exchange-xyf@1418532166959814.onaliyun.com
+AccessKey ID LTAI4G7aifKrBib16TjvXCTi
+AccessKey Secret 8GadVoBrFf55XOzC29fid4FMCt2D2g
+
+外网访问 oss-cn-guangzhou.aliyuncs.com
+Endpoint（地域节点）
+ECS 的经典网络访问（内网） oss-cn-guangzhou-internal.aliyuncs.com
+ECS 的 VPC 网络访问（内网）oss-cn-guangzhou-internal.aliyuncs.com
+-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alicloud-oss</artifactId>
+        </dependency>
     </dependencies>
 
     <!--    打包用-->

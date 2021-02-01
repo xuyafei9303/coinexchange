@@ -16,6 +16,10 @@ public class Constants {
 
     public static final String HTTPS = "https://";
 
+    public static final String POINT = ".";
+
+    public static final String SLASH = "/";
+
     public static final Integer SUCCESS = 200;
 
     public static final Integer FAIL = 500;
