@@ -14,6 +14,8 @@ import com.ixyf.service.SysMenuService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,18 +23,23 @@ import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class SysLoginServiceImpl implements SysLoginService {
 
-    @Autowired
+    @Resource
     private OAuth2FeignClient auth2FeignClient;
 
-    @Autowired
+    @Resource
     private SysMenuService sysMenuService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Value("${basic.token:Basic Y29pbi1hcGk6Y29pbi1zZWNyZXQ=}")
     private String basicToken;
@@ -64,6 +71,9 @@ public class SysLoginServiceImpl implements SysLoginService {
         List<SimpleGrantedAuthority> authorities = authoritiesList.stream()
                 .map(auth -> new SimpleGrantedAuthority(auth.toString()))
                 .collect(Collectors.toList());
+
+        // 将该token存储在redis中，配合网关做jwt校验
+        stringRedisTemplate.opsForValue().set(token, "", jwtToken.getExpiresIn(), TimeUnit.SECONDS);
         return new LoginResult(jwtToken.getTokenType() + " " + token, menus, authorities);
     }
 }

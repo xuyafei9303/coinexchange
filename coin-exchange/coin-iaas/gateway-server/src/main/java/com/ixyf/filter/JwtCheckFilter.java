@@ -49,7 +49,7 @@ public class JwtCheckFilter implements GlobalFilter, Ordered {
         }
         final Boolean hasKey = stringRedisTemplate.hasKey(token);
 //        if (hasKey != null && hasKey) // 原来是这样的 但是haskey一直是false！！！
-        if (hasKey != null) {
+        if (hasKey != null && hasKey) {
             return chain.filter(exchange); // token有效，直接放行
         }
         return buildNoAuthorizationResult(exchange);
