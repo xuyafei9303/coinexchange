@@ -1,15 +1,14 @@
 package com.ixyf.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
 
 /**
     * 用户人民币提现地址
@@ -39,6 +38,7 @@ public class UserBank {
      */
     @TableField(value = "remark")
     @ApiModelProperty(value="银行卡名称")
+    @NotBlank
     private String remark;
 
     /**
@@ -46,6 +46,7 @@ public class UserBank {
      */
     @TableField(value = "real_name")
     @ApiModelProperty(value="开户人")
+    @NotBlank
     private String realName;
 
     /**
@@ -53,6 +54,7 @@ public class UserBank {
      */
     @TableField(value = "bank")
     @ApiModelProperty(value="开户行")
+    @NotBlank
     private String bank;
 
     /**
@@ -81,6 +83,7 @@ public class UserBank {
      */
     @TableField(value = "bank_card")
     @ApiModelProperty(value="开户账号")
+    @NotBlank
     private String bankCard;
 
     /**
@@ -93,14 +96,14 @@ public class UserBank {
     /**
      * 更新时间
      */
-    @TableField(value = "last_update_time")
+    @TableField(value = "last_update_time", fill = FieldFill.INSERT_UPDATE)
     @ApiModelProperty(value="更新时间")
     private Date lastUpdateTime;
 
     /**
      * 创建时间
      */
-    @TableField(value = "created")
+    @TableField(value = "created", fill = FieldFill.INSERT)
     @ApiModelProperty(value="创建时间")
     private Date created;
 }

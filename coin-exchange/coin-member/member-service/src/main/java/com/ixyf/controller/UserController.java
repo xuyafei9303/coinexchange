@@ -83,4 +83,14 @@ public class UserController {
         }
         return R.fail("更新会员信息失败");
     }
+
+    @GetMapping("/info")
+    @ApiOperation(value = "查看会员详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "会员id")
+    })
+    public R<User> userInfo(Long id) {
+        User user = userService.getById(id);
+        return R.ok(user);
+    }
 }
