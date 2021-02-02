@@ -40,8 +40,6 @@ public class FileController {
     @Value("${spring.cloud.alicloud.secret-key}")
     private String accessKeySecret;
 
-
-
     @ApiOperation(value = "文件上传")
     @PostMapping("/image/AliYunImgUpload")
     @ApiImplicitParams({

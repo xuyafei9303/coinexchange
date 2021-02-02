@@ -9,7 +9,7 @@ spring:
     name: admin-service
   profiles:
     active: dev # 开发环境
-# 配合文件的dataId：nacos-server:8840/admin-service-dev.yaml
+# 配合文件的dataId：nacos-server:8848/admin-service-dev.yaml
 
 
 
