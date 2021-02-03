@@ -3,8 +3,13 @@ package com.ixyf.controller;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
+import com.ixyf.domain.UserAuthAuditRecord;
+import com.ixyf.domain.UserAuthInfo;
 import com.ixyf.model.R;
+import com.ixyf.service.UserAuthAuditRecordService;
+import com.ixyf.service.UserAuthInfoService;
 import com.ixyf.service.UserService;
+import com.ixyf.vo.AuthUserInfoVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -15,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * user_query
@@ -28,6 +35,12 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private UserAuthAuditRecordService auditRecordService;
+
+    @Resource
+    private UserAuthInfoService userAuthInfoService;
 
     @GetMapping
     @ApiOperation(value = "根据条件分页查询用户列表")
@@ -49,7 +62,7 @@ public class UserController {
             String realName,
             Integer status) {
         page.addOrder(OrderItem.desc("last_update_time"));
-        Page<User> userPage = userService.findByPage(page, mobile, userId, userName, realName, status);
+        Page<User> userPage = userService.findByPage(page, mobile, userId, userName, realName, status, null);
         return R.ok(userPage);
     }
 
@@ -108,4 +121,52 @@ public class UserController {
         return R.ok(userPage);
     }
 
+    @GetMapping("/auths")
+    @ApiOperation(value = "用户高级实名认证审核分页展示")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "realName", value = "用户姓名"),
+            @ApiImplicitParam(name = "userId", value = "用户id"),
+            @ApiImplicitParam(name = "userName", value = "用户名"),
+            @ApiImplicitParam(name = "mobile", value = "用户手机号"),
+            @ApiImplicitParam(name = "reviewsStatus", value = "审核状态,1通过,2拒绝,0,待审核"),
+            @ApiImplicitParam(name = "current", value = "当前页"),
+            @ApiImplicitParam(name = "size", value = "每页显示条数")
+    })
+    @PreAuthorize("hasAuthority('user_auth_query')")
+    public R<Page<User>> authUserPage(Page<User> page, String realName,Long userId, String userName, String mobile, Integer reviewsStatus) {
+        Page<User> userPage = userService.findByPage(page, realName, userId, userName, mobile, null, reviewsStatus);
+        return R.ok(userPage);
+    }
+
+    /**
+     * 详情包含三个部分：user(用户id，姓名等信息)，userAuthInfoList(用户审核证件照)，userAuditRecordList(用户审核历史)
+     * @param id
+     * @return
+     */
+    @GetMapping("/auth/info")
+    @ApiOperation(value = "查询用户的认证详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "用户id")
+    })
+    public R<AuthUserInfoVo> getAuthUserInfo(Long id) {
+        User user = userService.getById(id);
+        List<UserAuthAuditRecord> userAuthAuditRecords = null;
+        List<UserAuthInfo> userAuthInfos = null;
+        if (user != null) {
+            // 用户的审核记录
+            Integer reviewsStatus = user.getReviewsStatus();
+            if (reviewsStatus == null || reviewsStatus == 0) { // 待审核
+                userAuthAuditRecords = Collections.emptyList();
+                userAuthInfos = userAuthInfoService.getUserAuthInfoByUserId(id);
+            } else {
+                userAuthAuditRecords = auditRecordService.getUserAuthAuditRecordList(id);
+                // 查询用户的认证详情列表 -> 用户的身份信息
+                UserAuthAuditRecord auditRecord = userAuthAuditRecords.get(0); // 之前是按照认证日期进行排序的，第0个值就是最近被认证的值
+                Byte authCode = auditRecord.getStatus(); // 认证的唯一标识
+                userAuthInfos = userAuthInfoService.getUserAuthInfoByCode(authCode);
+            }
+        }
+        return R.ok(new AuthUserInfoVo(user,userAuthInfos, userAuthAuditRecords));
+
+    }
 }

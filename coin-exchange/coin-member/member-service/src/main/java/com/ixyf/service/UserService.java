@@ -13,9 +13,10 @@ public interface UserService extends IService<User>{
      * @param userName 会员名
      * @param realName 会员真实姓名
      * @param status 会员状态
+     * @param reviewsStatus 用户审核状态 这里是两个分页使用同一个接口 分别对应的是status和reviewsStatus
      * @return
      */
-    Page<User> findByPage(Page<User> page, String mobile, Long userId, String userName, String realName, Integer status);
+    Page<User> findByPage(Page<User> page, String mobile, Long userId, String userName, String realName, Integer status, Integer reviewsStatus);
 
     /**
      * 通过用户的id查看该用户邀请的用户列表
