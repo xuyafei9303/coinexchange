@@ -16,4 +16,12 @@ public interface UserService extends IService<User>{
      * @return
      */
     Page<User> findByPage(Page<User> page, String mobile, Long userId, String userName, String realName, Integer status);
+
+    /**
+     * 通过用户的id查看该用户邀请的用户列表
+     * @param page 分页参数
+     * @param userId 用户id
+     * @return
+     */
+    Page<User> findByDirectInvitesPage(Page<User> page, Long userId);
 }

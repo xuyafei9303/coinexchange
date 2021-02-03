@@ -24,4 +24,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(status != null, User::getStatus, status)
         );
     }
+
+    @Override
+    public Page<User> findByDirectInvitesPage(Page<User> page, Long userId) {
+        return page(page, new LambdaQueryWrapper<User>().eq(User::getDirectInviteid, userId));
+    }
 }

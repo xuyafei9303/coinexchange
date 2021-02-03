@@ -76,4 +76,8 @@ public class UserAddress {
     @TableField(value = "markid")
     @ApiModelProperty(value="")
     private Long markid;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "币种名称")
+    private String coinName = "测试币种";
 }

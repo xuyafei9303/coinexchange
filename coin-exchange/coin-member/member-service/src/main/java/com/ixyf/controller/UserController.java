@@ -79,7 +79,8 @@ public class UserController {
     public R update(@RequestBody @Validated User user) {
         boolean update = userService.updateById(user);
         if (update) {
-            return R.ok("更新会员信息成功");
+            return R.ok("更新会员" +
+                    "信息成功");
         }
         return R.fail("更新会员信息失败");
     }
@@ -93,4 +94,18 @@ public class UserController {
         User user = userService.getById(id);
         return R.ok(user);
     }
+
+    @GetMapping("/directInvites")
+    @ApiOperation(value = "查看该用户邀请的用户列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户id"),
+            @ApiImplicitParam(name = "current", value = "当前页"),
+            @ApiImplicitParam(name = "size", value = "每页显示条数")
+    })
+    public R<Page<User>> directInvites(@ApiIgnore Page<User> page, Long userId) {
+
+        Page<User> userPage = userService.findByDirectInvitesPage(page, userId);
+        return R.ok(userPage);
+    }
+
 }
