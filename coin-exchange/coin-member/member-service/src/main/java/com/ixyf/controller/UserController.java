@@ -167,6 +167,27 @@ public class UserController {
             }
         }
         return R.ok(new AuthUserInfoVo(user,userAuthInfos, userAuthAuditRecords));
+    }
 
+    /**
+     * 对身份证图片进行认证，符合条件则认证通过
+     * @return
+     */
+    @PostMapping("/auths/status")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "用户id"),
+            @ApiImplicitParam(name = "authStatus", value = "用户审核状态"),
+            @ApiImplicitParam(name = "authCode", value = "一组(身份证)图片的唯一标识"),
+            @ApiImplicitParam(name = "remark", value = "审核被拒绝时填写的备注信息")
+    })
+    public R updateUserAuthStatus(@RequestParam(value = "id", required = true) Long id,
+                                  @RequestParam(value = "authStatus", required = true) Byte authStatus,
+                                  @RequestParam(value = "authCode", required = true) Long authCode,
+                                  @RequestParam(value = "remark", required = true) String remark) {
+
+        // 修改user里面的reviewStatus
+        // 在authAuditRecord里面添加一条记录
+        userService.updateUserAuthStatus(id, authStatus, authCode, remark);
+        return R.ok();
     }
 }

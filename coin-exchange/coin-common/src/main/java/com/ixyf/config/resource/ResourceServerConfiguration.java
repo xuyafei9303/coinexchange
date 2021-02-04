@@ -28,6 +28,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .sessionManagement().disable()
                 .authorizeRequests()
                 .antMatchers(
+                        "/gt/register",
                         "/login",
                         "/v2/api-docs",
                         "/swagger-resources/configuration/ui",//用来获取支持的动作
