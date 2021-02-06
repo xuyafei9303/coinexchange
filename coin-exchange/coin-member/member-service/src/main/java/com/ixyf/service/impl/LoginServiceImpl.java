@@ -7,20 +7,15 @@ import com.ixyf.feign.OAuth2FeignClient;
 import com.ixyf.form.LoginForm;
 import com.ixyf.form.LoginUser;
 import com.ixyf.geetest.GeetestLib;
-import com.ixyf.geetest.entity.GeetestLibResult;
 import com.ixyf.service.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -31,7 +26,7 @@ public class LoginServiceImpl implements LoginService {
     private OAuth2FeignClient auth2FeignClient;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     private GeetestLib geetestLib;
@@ -63,34 +58,7 @@ public class LoginServiceImpl implements LoginService {
      * @param loginForm
      */
     private void checkFormData(LoginForm loginForm) {
+        loginForm.check(loginForm, geetestLib, redisTemplate);
 
-        String challenge = loginForm.getGeetest_challenge();
-        String validate = loginForm.getGeetest_validate();
-        String seccode = loginForm.getGeetest_seccode();
-        int status = 0;
-        String userId = "";
-        // 检测存入redis中的极验云状态标识
-        String key = redisTemplate.opsForValue().get(GeetestLib.GEETEST_SERVER_STATUS_SESSION_KEY);
-        assert key != null;
-        status = Integer.parseInt(key);
-        userId = redisTemplate.opsForValue().get(GeetestLib.GEETEST_SERVER_USER_KEY + ":" + loginForm.getUuid());
-        GeetestLibResult result = null;
-        assert result != null;
-        if (status == 1) {
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            Map<String, String> paramMap = new HashMap<String, String>();
-            paramMap.put("user_id", userId);
-            paramMap.put("client_type", "web");
-            paramMap.put("ip_address", HttpUtil.getClientIP(servletRequestAttributes.getRequest()));
-            result = geetestLib.successValidate(challenge, validate, seccode, paramMap);
-            log.info("验证的结果为：{}", JSON.toJSONString(result, true));
-        } else {
-            result = geetestLib.failValidate(challenge, validate, seccode);
-        }
-        // 注意，不要更改返回的结构和值类型
-        if (result.getStatus() != 1) {
-            log.info("验证码验证异常:", JSON.toJSONString(result, true));
-            throw new IllegalArgumentException("验证码验证异常");
-        }
     }
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
+import com.ixyf.form.UserAuthForm;
 import com.ixyf.model.R;
 import com.ixyf.service.UserAuthAuditRecordService;
 import com.ixyf.service.UserAuthInfoService;
@@ -15,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -166,7 +168,7 @@ public class UserController {
                 userAuthInfos = userAuthInfoService.getUserAuthInfoByCode(authCode);
             }
         }
-        return R.ok(new AuthUserInfoVo(user,userAuthInfos, userAuthAuditRecords));
+        return R.ok(new AuthUserInfoVo(user, userAuthInfos, userAuthAuditRecords));
     }
 
     /**
@@ -189,5 +191,32 @@ public class UserController {
         // 在authAuditRecord里面添加一条记录
         userService.updateUserAuthStatus(id, authStatus, authCode, remark);
         return R.ok();
+    }
+
+    @GetMapping("/current/info")
+    @ApiOperation(value = "获取当前用户的用户中心")
+    public R<Object> currentUserInfo() {
+        String user = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        User userServiceById = userService.getById(Long.valueOf(user));
+        userServiceById.setPassword("******");
+        userServiceById.setPaypassword("******");
+        userServiceById.setAccessKeyId("*******");
+        userServiceById.setAccessKeySecret("******");
+
+        return R.ok(userServiceById);
+    }
+
+    @PostMapping("/authAccount")
+    @ApiOperation(value = "用户实名认证")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userAuthForm", value = "userAuthForm json")
+    })
+    public R identifierVerify(@RequestBody UserAuthForm userAuthForm) throws Exception {
+        String userStr = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        boolean verify = userService.identifierVerify(Long.valueOf(userStr), userAuthForm);
+        if (verify) {
+            return R.ok();
+        }
+        return R.fail("认证失败");
     }
 }

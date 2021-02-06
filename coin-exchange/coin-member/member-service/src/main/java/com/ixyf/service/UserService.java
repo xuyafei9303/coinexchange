@@ -3,6 +3,8 @@ package com.ixyf.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ixyf.form.UserAuthForm;
+
 public interface UserService extends IService<User>{
 
     /**
@@ -34,4 +36,12 @@ public interface UserService extends IService<User>{
      * @param remark 审核被拒绝时的拒绝原因
      */
     void updateUserAuthStatus(Long id, Byte authStatus, Long authCode, String remark);
+
+    /**
+     * 用户的实名认证
+     * @param id 用户id
+     * @param userAuthForm 认证的表单请求
+     * @return
+     */
+    boolean identifierVerify(Long id, UserAuthForm userAuthForm) throws Exception;
 }

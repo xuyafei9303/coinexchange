@@ -11,5 +11,10 @@ spring:
     active: dev # 开发环境
 # 配合文件的dataId：nacos-server:8848/admin-service-dev.yaml
 
-
-
+identifier:
+  url: http://idenauthen.market.alicloudapi.com
+  path: /idenAuthentication
+  method: POST
+  appKey: 203912541
+  appSecret: nyggJ2gVN5a4353VnzkyeMvQEYIvVcUe
+  appCode: de30907194e043a59266dcb482642e94

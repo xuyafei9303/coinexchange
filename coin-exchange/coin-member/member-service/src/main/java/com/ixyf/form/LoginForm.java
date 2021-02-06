@@ -8,14 +8,9 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @ApiModel(value = "登录参数")
-public class LoginForm {
+public class LoginForm extends GeetestForm{
 
-    /**
-     * 极验相关
-     */
-    private String geetest_challenge;
-    private String geetest_seccode;
-    private String geetest_validate;
+
 
     @ApiModelProperty(value = "电话编号+86")
     private String countryCode;

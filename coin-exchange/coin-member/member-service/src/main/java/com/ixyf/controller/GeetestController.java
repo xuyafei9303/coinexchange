@@ -16,7 +16,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +35,7 @@ public class GeetestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "uuid", value = "用户验证的一个凭证")
     })
-    public R<String> register(String uuid) {
+    public R<String> test(String uuid) {
         Map<String, String> paramMap = new HashMap<String, String>();
         DigestmodEnum digestmodEnum = DigestmodEnum.MD5;
         paramMap.put("digestmod", digestmodEnum.getName());
@@ -52,5 +51,4 @@ public class GeetestController {
 
         return R.ok(result.getData());
     }
-
 }

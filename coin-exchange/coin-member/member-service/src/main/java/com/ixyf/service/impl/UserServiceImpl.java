@@ -2,20 +2,27 @@ package com.ixyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ixyf.config.IdenAuthenticationConfiguration;
 import com.ixyf.domain.UserAuthAuditRecord;
+import com.ixyf.form.UserAuthForm;
+import com.ixyf.geetest.GeetestLib;
 import com.ixyf.service.UserAuthAuditRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ixyf.domain.User;
 import com.ixyf.mapper.UserMapper;
 import com.ixyf.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import sun.security.timestamp.TSRequest;
 
 @Slf4j
 @Service
@@ -23,6 +30,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserAuthAuditRecordService userAuthAuditRecordService;
+
+    @Resource
+    private GeetestLib geetestLib;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public Page<User> findByPage(Page<User> page, String mobile, Long userId, String userName, String realName, Integer status, Integer reviewsStatus) {
@@ -61,5 +74,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userAuthAuditRecord.setRemark(remark);// 拒绝时填写
 
         userAuthAuditRecordService.save(userAuthAuditRecord);
+    }
+
+    @Override
+    public boolean identifierVerify(Long id, UserAuthForm userAuthForm) throws Exception {
+        User user = getById(id);
+        Assert.notNull(user, "认证用户不存在");
+        Byte authStatus = user.getAuthStatus();
+        if (!authStatus.equals((byte) 0)) {
+            throw new IllegalArgumentException("不合法的参数异常，该用户已经认证通过了");
+        }
+        // 执行认证
+        checkForm(userAuthForm); // 极验
+        // 实名认证
+        boolean check = IdenAuthenticationConfiguration.check(userAuthForm.getRealName(), userAuthForm.getIdCard());
+        if (!check) {
+            throw new IllegalArgumentException("该用户信息错误");
+        }
+        user.setAuthtime(new Date());
+        user.setAuthStatus((byte) 1);
+        user.setRealName(userAuthForm.getRealName());
+        user.setIdCard(userAuthForm.getIdCard());
+        user.setIdCardType(userAuthForm.getIdCardType());
+
+        return updateById(user);
+    }
+
+    private void checkForm(UserAuthForm userAuthForm) {
+        userAuthForm.check(userAuthForm, geetestLib, redisTemplate);
     }
 }
