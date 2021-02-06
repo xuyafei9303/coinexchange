@@ -8,11 +8,11 @@ import com.ixyf.form.UserAuthForm;
 import com.ixyf.geetest.GeetestLib;
 import com.ixyf.service.UserAuthAuditRecordService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,6 +21,7 @@ import com.ixyf.mapper.UserMapper;
 import com.ixyf.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import sun.security.timestamp.TSRequest;
 
@@ -102,5 +103,45 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private void checkForm(UserAuthForm userAuthForm) {
         userAuthForm.check(userAuthForm, geetestLib, redisTemplate);
+    }
+
+    @Override
+    public User getById(Serializable id) {
+        User user = super.getById(id);
+        if (user == null) {
+            throw new IllegalArgumentException("用户id不正确");
+        }
+        Byte seniorAuthStatus = null;
+        String seniorAuthDesc = "";
+        Integer reviewsStatus = user.getReviewsStatus(); // 用户被审核的状态 审核状态,1通过,2拒绝,0,待审核
+        if (reviewsStatus == null) {
+            seniorAuthStatus = 3;
+            seniorAuthDesc = "资料未填写";
+        } else {
+            switch (reviewsStatus) {
+                case 1: // 通过
+                    seniorAuthStatus = 1;
+                    seniorAuthDesc = "审核通过";
+                    break;
+                case 2: // 拒绝
+                    seniorAuthStatus = 2;
+                    // 查询被拒绝的原因 -> 审核记录
+                    // 按时间排序的 最近的一条
+                    List<UserAuthAuditRecord> authAuditRecordList = userAuthAuditRecordService.getUserAuthAuditRecordList(user.getId());
+                    if (!CollectionUtils.isEmpty(authAuditRecordList)) {
+                        UserAuthAuditRecord authAuditRecord = authAuditRecordList.get(0);
+                        seniorAuthDesc = authAuditRecord.getRemark();
+                    }
+                    seniorAuthDesc = "原因未知 未填写";
+                    break;
+                case 0:
+                    seniorAuthStatus = 0;
+                    seniorAuthDesc = "等待审核";
+                    break;
+            }
+        }
+        user.setSeniorAuthStatus(seniorAuthStatus);
+        user.setSeniorAuthDesc(seniorAuthDesc);
+        return user;
     }
 }

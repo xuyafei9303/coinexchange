@@ -230,4 +230,15 @@ public class User {
     @TableField(value = "created", fill = FieldFill.INSERT)
     @ApiModelProperty(value="创建时间")
     private Date created;
+
+    /**
+     * http://localhost:8081/#/usercenter/modify-id-senior
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "会员的高级认证状态 0审核中 1审核通过 2被拒绝，拒绝需要有拒绝理由seniorAuthDesc 3未填写")
+    private Byte seniorAuthStatus;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "拒绝理由")
+    private String seniorAuthDesc;
 }

@@ -41,7 +41,12 @@ public class IdenAuthenticationConfiguration {
         headers.add("Content-Type", "application/x-www-form-urlencoded");
         headers.add("Authorization", "APPCODE " + idenAuthenticationProperties.getAppCode());
         HttpEntity<MultiValueMap<String, Object>> r = new HttpEntity<>(postParameters, headers);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(idenAuthenticationProperties.getUrl() + idenAuthenticationProperties.getPath(), HttpMethod.POST, r, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                idenAuthenticationProperties.getUrl() + idenAuthenticationProperties.getPath(),
+                HttpMethod.POST,
+                r,
+                String.class
+        );
         System.out.println("responseEntity = " + responseEntity);
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
