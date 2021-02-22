@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -182,10 +183,10 @@ public class UserController {
             @ApiImplicitParam(name = "authCode", value = "一组(身份证)图片的唯一标识"),
             @ApiImplicitParam(name = "remark", value = "审核被拒绝时填写的备注信息")
     })
-    public R updateUserAuthStatus(@RequestParam(value = "id", required = true) Long id,
-                                  @RequestParam(value = "authStatus", required = true) Byte authStatus,
-                                  @RequestParam(value = "authCode", required = true) Long authCode,
-                                  @RequestParam(value = "remark", required = true) String remark) {
+    public R updateUserAuthStatus(@RequestParam(required = true) Long id,
+                                  @RequestParam(required = true) Byte authStatus,
+                                  @RequestParam(required = true) Long authCode,
+                                  String remark) {
 
         // 修改user里面的reviewStatus
         // 在authAuditRecord里面添加一条记录
@@ -218,5 +219,17 @@ public class UserController {
             return R.ok();
         }
         return R.fail("认证失败");
+    }
+
+    @PostMapping("/authUser")
+    @ApiOperation(value = "用户高级认证")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "imgs", value = "用户认证需要的身份证图片数组")
+    })
+    public R authUser(@RequestBody String [] imgs) {
+
+        String stringUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        userService.authUser(Long.valueOf(stringUser), Arrays.asList(imgs));
+        return R.ok();
     }
 }

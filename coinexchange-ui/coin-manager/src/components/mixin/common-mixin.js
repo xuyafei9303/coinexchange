@@ -372,7 +372,7 @@ export default {
     },
     handleUploadSuccess(response) {
       const { status,uri } = response
-      const aliyunFileUrl = 'https://coin-exchange-imgs.oss-cn-beijing.aliyuncs.com/'
+      const aliyunFileUrl = 'https://coin-exchange-xyf.oss-cn-guangzhou.aliyuncs.com/'
       if(status === "OK"){
         this.coinForm.img = aliyunFileUrl + uri
         console.log(this.coinForm.img)

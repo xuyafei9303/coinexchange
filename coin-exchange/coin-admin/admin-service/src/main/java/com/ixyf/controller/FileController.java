@@ -55,7 +55,7 @@ public class FileController {
      * oss的回调地址
      */
     // TODO 内网穿透地址
-    @Value("${oss.callback.url:http://kvgprm.natappfree.cc}")
+    @Value("${oss.callback.url:http://5kmqdp.natappfree.cc}")
     private String ossCallBack;
 
     @ApiOperation(value = "文件上传")
@@ -74,7 +74,6 @@ public class FileController {
         String fileName = DateUtil.today().replaceAll("-", "/") + "/" + file.getOriginalFilename();
         ossClient.putObject(bucketName, fileName, file.getInputStream());
         // https://coin-exchange-xyf.oss-cn-guangzhou.aliyuncs.com/2021/02/06/1612621615554.jpg
-        // https://coin-exchange-xyf.oss-cn-guangzhou.aliyuncs.com2021/02/06/1612622433758.jpg
         return R.ok(Constants.HTTPS + bucketName + Constants.POINT + endPoint + Constants.SLASH + fileName);
     }
 
@@ -124,14 +123,7 @@ public class FileController {
 
             return respMap;
 
-//            JSONObject ja1 = JSONObject.fromObject(respMap);
-//            // System.out.println(ja1.toString());
-//            response.setHeader("Access-Control-Allow-Origin", "*");
-//            response.setHeader("Access-Control-Allow-Methods", "GET, POST");
-//            response(request, response, ja1.toString());
-
         } catch (Exception e) {
-            // Assert.fail(e.getMessage());
             e.printStackTrace();
         }
         return null;

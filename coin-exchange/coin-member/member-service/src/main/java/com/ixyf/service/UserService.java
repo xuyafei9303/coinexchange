@@ -5,6 +5,8 @@ import com.ixyf.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ixyf.form.UserAuthForm;
 
+import java.util.List;
+
 public interface UserService extends IService<User>{
 
     /**
@@ -44,4 +46,11 @@ public interface UserService extends IService<User>{
      * @return
      */
     boolean identifierVerify(Long id, UserAuthForm userAuthForm) throws Exception;
+
+    /**
+     * 用户高级认证
+     * @param stringUser 用户
+     * @param imgList 身份证图片数组
+     */
+    void authUser(Long stringUser, List<String> imgList);
 }

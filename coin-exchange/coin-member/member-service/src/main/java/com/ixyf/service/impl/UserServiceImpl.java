@@ -1,18 +1,23 @@
 package com.ixyf.service.impl;
 
+import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ixyf.config.IDGenConfig;
 import com.ixyf.config.IdenAuthenticationConfiguration;
 import com.ixyf.domain.UserAuthAuditRecord;
+import com.ixyf.domain.UserAuthInfo;
 import com.ixyf.form.UserAuthForm;
 import com.ixyf.geetest.GeetestLib;
 import com.ixyf.service.UserAuthAuditRecordService;
+import com.ixyf.service.UserAuthInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -23,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import sun.security.timestamp.TSRequest;
 
 @Slf4j
 @Service
@@ -31,6 +35,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserAuthAuditRecordService userAuthAuditRecordService;
+
+    @Resource
+    private UserAuthInfoService userAuthInfoService;
+
+    private final Snowflake snowflake = new Snowflake(IDGenConfig.appCode, IDGenConfig.machineCode);
 
     @Resource
     private GeetestLib geetestLib;
@@ -101,6 +110,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return updateById(user);
     }
 
+    /**
+     * 用户高级认证
+     * @param stringUser 用户
+     * @param imgList 身份证图片数组
+     */
+    @Override
+    @Transactional
+    public void authUser(Long stringUser, List<String> imgList) {
+
+        if (CollectionUtils.isEmpty(imgList)) throw new IllegalArgumentException("用户的身份证信息为空");
+
+        User user = getById(stringUser);
+        long authCode = snowflake.nextId(); // 使用雪花算法生成code
+        List<UserAuthInfo> userAuthInfoList = new ArrayList<>(imgList.size());
+        if (user == null) throw new IllegalArgumentException("用户不正确");
+        for (int i = 0; i < imgList.size(); i++) {
+            UserAuthInfo userAuthInfo = new UserAuthInfo();
+            userAuthInfo.setImageUrl(imgList.get(i));
+            userAuthInfo.setUserId(stringUser);
+            userAuthInfo.setSerialno(i + 1); // 设置序号 按照顺序排列的 1正面 2反面 3手持
+            userAuthInfo.setAuthCode(authCode); // 一组身份信息的标识 3个图片为一组
+            userAuthInfoList.add(userAuthInfo);
+        }
+        userAuthInfoService.saveBatch(userAuthInfoList); // 批量插入
+        user.setReviewsStatus(0); // 等待审核
+        updateById(user); // 更新用户状态
+    }
+
     private void checkForm(UserAuthForm userAuthForm) {
         userAuthForm.check(userAuthForm, geetestLib, redisTemplate);
     }
@@ -132,7 +169,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         UserAuthAuditRecord authAuditRecord = authAuditRecordList.get(0);
                         seniorAuthDesc = authAuditRecord.getRemark();
                     }
-                    seniorAuthDesc = "原因未知 未填写";
                     break;
                 case 0:
                     seniorAuthStatus = 0;
