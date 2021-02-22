@@ -14,7 +14,9 @@ import com.ixyf.service.SmsService;
 
 import javax.annotation.Resource;
 
-
+/**
+ *
+ */
 @Service
 @Slf4j
 public class SmsServiceImpl extends ServiceImpl<SmsMapper, Sms> implements SmsService{
