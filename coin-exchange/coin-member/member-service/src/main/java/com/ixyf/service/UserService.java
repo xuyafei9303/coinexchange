@@ -3,9 +3,7 @@ package com.ixyf.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ixyf.form.UpdateLoginPasswordForm;
-import com.ixyf.form.UpdatePhoneForm;
-import com.ixyf.form.UserAuthForm;
+import com.ixyf.form.*;
 
 import java.util.List;
 
@@ -79,4 +77,27 @@ public interface UserService extends IService<User>{
      * @return
      */
     boolean updateLoginPassword(Long userId, UpdateLoginPasswordForm updateLoginPasswordForm);
+
+    /**
+     * 修改用户交易密码
+     * @param userId
+     * @param updatePayPasswordForm
+     * @return
+     */
+    boolean updatePayPassword(Long userId, UpdatePayPasswordForm updatePayPasswordForm);
+
+    /**
+     * 重置用户的支付密码
+     * @param userId
+     * @param resetPayPasswordForm
+     * @return
+     */
+    boolean resetPayPassword(Long userId, ResetPayPasswordForm resetPayPasswordForm);
+
+    /**
+     * 获取用户的邀请列表
+     * @param userId
+     * @return
+     */
+    List<User> getUserInvites(Long userId);
 }

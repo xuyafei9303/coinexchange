@@ -8,9 +8,7 @@ import com.ixyf.config.IdenAuthenticationConfiguration;
 import com.ixyf.domain.Sms;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
-import com.ixyf.form.UpdateLoginPasswordForm;
-import com.ixyf.form.UpdatePhoneForm;
-import com.ixyf.form.UserAuthForm;
+import com.ixyf.form.*;
 import com.ixyf.geetest.GeetestLib;
 import com.ixyf.service.SmsService;
 import com.ixyf.service.UserAuthAuditRecordService;
@@ -24,6 +22,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -163,6 +162,63 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public List<User> getUserInvites(Long userId) {
+        List<User> users = list(new LambdaQueryWrapper<User>().eq(User::getDirectInviteid, userId));
+        if (CollectionUtils.isEmpty(users)) {
+            return Collections.emptyList();
+        }
+        users.forEach(user -> {
+            user.setPaypassword("******");
+            user.setPassword("******");
+            user.setAccessKeyId("******");
+            user.setAccessKeySecret("******");
+        });
+        return users;
+    }
+
+    @Override
+    public boolean resetPayPassword(Long userId, ResetPayPasswordForm resetPayPasswordForm) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("用户id为空");
+        }
+        @NotBlank String validateCode = resetPayPasswordForm.getValidateCode();
+        String verifyCode = (String) redisTemplate.opsForValue().get("SMS:FORGOT_PAY_PWD_VERIFY:" + user.getMobile());
+        if (!validateCode.equals(verifyCode)) {
+            throw new IllegalArgumentException("验证码错误");
+        }
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPaypassword(passwordEncoder.encode(resetPayPasswordForm.getPayPassword()));
+
+        return updateById(user);
+    }
+
+    @Override
+    public boolean updatePayPassword(Long userId, UpdatePayPasswordForm updatePayPasswordForm) {
+        // 查询用户
+        User user = getById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("用户id不存在");
+        }
+        @NotBlank String oldPassword = updatePayPasswordForm.getOldpassword();
+        // 校验旧密码 数据库里都是加密过后的密码
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        boolean matches = passwordEncoder.matches(updatePayPasswordForm.getOldpassword(), user.getPaypassword());
+        if (!matches) {
+            throw new IllegalArgumentException("用户的原始密码错误");
+        }
+        // 校验手机验证码
+        @NotBlank String validateCode = updatePayPasswordForm.getValidateCode();
+        String keyCode = (String) redisTemplate.opsForValue().get("SMS:CHANGE_PAY_PWD_VERIFY:" + user.getMobile());
+        if (!validateCode.equals(keyCode)) {
+            throw new IllegalArgumentException("手机验证码错误");
+        }
+        user.setPaypassword(passwordEncoder.encode(updatePayPasswordForm.getNewpassword()));
+
+        return updateById(user);
+    }
+
+    @Override
     public boolean updateLoginPassword(Long userId, UpdateLoginPasswordForm updateLoginPasswordForm) {
         // 查询用户
         User user = getById(userId);
@@ -172,8 +228,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         @NotBlank String oldPassword = updateLoginPasswordForm.getOldpassword();
         // 校验旧密码 数据库里都是加密过后的密码
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encode = passwordEncoder.encode(oldPassword); // 加密后的密码
-        boolean matches = passwordEncoder.matches(updateLoginPasswordForm.getOldpassword(), encode);
+        boolean matches = passwordEncoder.matches(updateLoginPasswordForm.getOldpassword(), user.getPassword());
         if (!matches) {
             throw new IllegalArgumentException("用户的原始密码错误");
         }
@@ -183,7 +238,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!validateCode.equals(keyCode)) {
             throw new IllegalArgumentException("手机验证码错误");
         }
-        user.setPassword(updateLoginPasswordForm.getNewpassword());
+        user.setPassword(passwordEncoder.encode(updateLoginPasswordForm.getNewpassword()));
 
         return updateById(user);
     }

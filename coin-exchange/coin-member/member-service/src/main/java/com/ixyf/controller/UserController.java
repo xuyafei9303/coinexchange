@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
-import com.ixyf.form.UpdateLoginPasswordForm;
-import com.ixyf.form.UpdatePhoneForm;
-import com.ixyf.form.UserAuthForm;
+import com.ixyf.form.*;
 import com.ixyf.model.R;
 import com.ixyf.service.UserAuthAuditRecordService;
 import com.ixyf.service.UserAuthInfoService;
@@ -274,6 +272,42 @@ public class UserController {
         if (update) {
             return R.ok();
         }
-        return R.fail("更新密码失败");
+        return R.fail("更新登录密码失败");
+    }
+
+    @PostMapping("/updatePayPassword")
+    @ApiOperation(value = "修改交易密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "updatePayPasswordForm", value = "updatePayPasswordForm json")
+    })
+    public R updatePayPassword(@RequestBody @Validated UpdatePayPasswordForm updatePayPasswordForm) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean update = userService.updatePayPassword(userId, updatePayPasswordForm);
+        if (update) {
+            return R.ok();
+        }
+        return R.fail("更新交易密码失败");
+    }
+
+    @PostMapping("/setPayPassword")
+    @ApiOperation(value = "重新设置交易密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "payPasswordForm", value = "payPasswordForm json")
+    })
+    public R resetPayPassword(@RequestBody @Validated ResetPayPasswordForm resetPayPasswordForm) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean reset = userService.resetPayPassword(userId, resetPayPasswordForm);
+        if (reset) {
+            return R.ok();
+        }
+        return R.fail("重置密码失败");
+    }
+
+    @GetMapping("/invites")
+    @ApiOperation(value = "用户的邀请列表")
+    public R<List<User>> getUserInvites() {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        List<User> userList = userService.getUserInvites(userId);
+        return R.ok(userList);
     }
 }
