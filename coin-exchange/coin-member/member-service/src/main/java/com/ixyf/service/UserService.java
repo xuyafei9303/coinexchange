@@ -3,6 +3,8 @@ package com.ixyf.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ixyf.form.UpdateLoginPasswordForm;
+import com.ixyf.form.UpdatePhoneForm;
 import com.ixyf.form.UserAuthForm;
 
 import java.util.List;
@@ -53,4 +55,28 @@ public interface UserService extends IService<User>{
      * @param imgList 身份证图片数组
      */
     void authUser(Long stringUser, List<String> imgList);
+
+    /**
+     * 修改用户手机号
+     * @param userId
+     * @param updatePhoneForm
+     * @return
+     */
+    boolean updatePhone(Long userId, UpdatePhoneForm updatePhoneForm);
+
+    /**
+     * 校验新手机号是否可用，若可用，则给新的手机号发送验证码
+     * @param mobile 新的手机号
+     * @param countryCode
+     * @return
+     */
+    boolean checkNewPhone(String mobile, String countryCode);
+
+    /**
+     * 修改用户的登录密码
+     * @param userId
+     * @param updateLoginPasswordForm
+     * @return
+     */
+    boolean updateLoginPassword(Long userId, UpdateLoginPasswordForm updateLoginPasswordForm);
 }

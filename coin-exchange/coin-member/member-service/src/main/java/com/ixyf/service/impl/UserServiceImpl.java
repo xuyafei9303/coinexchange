@@ -5,17 +5,23 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.config.IDGenConfig;
 import com.ixyf.config.IdenAuthenticationConfiguration;
+import com.ixyf.domain.Sms;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
+import com.ixyf.form.UpdateLoginPasswordForm;
+import com.ixyf.form.UpdatePhoneForm;
 import com.ixyf.form.UserAuthForm;
 import com.ixyf.geetest.GeetestLib;
+import com.ixyf.service.SmsService;
 import com.ixyf.service.UserAuthAuditRecordService;
 import com.ixyf.service.UserAuthInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +44,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserAuthInfoService userAuthInfoService;
+
+    @Resource
+    private SmsService smsService;
 
     private final Snowflake snowflake = new Snowflake(IDGenConfig.appCode, IDGenConfig.machineCode);
 
@@ -137,6 +146,66 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setReviewsStatus(0); // 等待审核
         updateById(user); // 更新用户状态
     }
+
+    @Override
+    public boolean checkNewPhone(String mobile, String countryCode) {
+        // 新手机号，没有被占用
+        int count = count(new LambdaQueryWrapper<User>().eq(User::getMobile, mobile).eq(User::getCountryCode, countryCode));
+        if (count > 0) { // 已被占用
+            throw new IllegalArgumentException("该手机号已经被占用");
+        }
+        // 向新的手机发送短信
+        Sms sms = new Sms();
+        sms.setMobile(mobile);
+        sms.setCountryCode(countryCode);
+        sms.setTemplateCode("CHANGE_PHONE_VERIFY"); // 模板代码 CHANGE_PHONE_VERIFY
+        return smsService.sendSms(sms);
+    }
+
+    @Override
+    public boolean updateLoginPassword(Long userId, UpdateLoginPasswordForm updateLoginPasswordForm) {
+        // 查询用户
+        User user = getById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("用户id不存在");
+        }
+        @NotBlank String oldPassword = updateLoginPasswordForm.getOldpassword();
+        // 校验旧密码 数据库里都是加密过后的密码
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encode = passwordEncoder.encode(oldPassword); // 加密后的密码
+        boolean matches = passwordEncoder.matches(updateLoginPasswordForm.getOldpassword(), encode);
+        if (!matches) {
+            throw new IllegalArgumentException("用户的原始密码错误");
+        }
+        // 校验手机验证码
+        @NotBlank String validateCode = updateLoginPasswordForm.getValidateCode();
+        String keyCode = (String) redisTemplate.opsForValue().get("SMS:CHANGE_LOGIN_PWD_VERIFY:" + user.getMobile());
+        if (!validateCode.equals(keyCode)) {
+            throw new IllegalArgumentException("手机验证码错误");
+        }
+        user.setPassword(updateLoginPasswordForm.getNewpassword());
+
+        return updateById(user);
+    }
+
+    @Override
+    public boolean updatePhone(Long userId, UpdatePhoneForm updatePhoneForm) {
+        // 查询用户
+        User user = getById(userId);
+        @NotBlank String oldMobile = user.getMobile();
+        String oldMobileCode = (String) redisTemplate.opsForValue().get("SMS:VERIFY_OLD_PHONE:" + oldMobile);
+        if (!updatePhoneForm.getOldValidateCode().equals(oldMobileCode)) {
+            throw new IllegalArgumentException("旧手机的验证码错误");
+        }
+        String newMobileCode = (String) redisTemplate.opsForValue().get("SMS:VERIFY_OLD_PHONE:" + updatePhoneForm.getNewMobilePhone());
+        if (!updatePhoneForm.getValidateCode().equals(newMobileCode)) {
+            throw new IllegalArgumentException("新手机的验证码错误");
+        }
+        user.setMobile(updatePhoneForm.getNewMobilePhone());
+
+        return updateById(user);
+    }
+
 
     private void checkForm(UserAuthForm userAuthForm) {
         userAuthForm.check(userAuthForm, geetestLib, redisTemplate);

@@ -1,11 +1,15 @@
 package com.ixyf.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.alibaba.cloud.spring.boot.sms.ISmsService;
 import com.alibaba.fastjson.JSON;
 import com.aliyun.mns.common.ClientException;
 import com.aliyuncs.dysmsapi.model.v20170525.SendSmsRequest;
 import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
+import com.ixyf.domain.Config;
+import com.ixyf.service.ConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ixyf.mapper.SmsMapper;
@@ -13,6 +17,8 @@ import com.ixyf.domain.Sms;
 import com.ixyf.service.SmsService;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.NotBlank;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -23,6 +29,12 @@ public class SmsServiceImpl extends ServiceImpl<SmsMapper, Sms> implements SmsSe
 
     @Resource
     private ISmsService iSmsService;
+
+    @Resource
+    private ConfigService configService;
+
+    @Resource
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public boolean sendSms(Sms sms) {
@@ -56,13 +68,26 @@ public class SmsServiceImpl extends ServiceImpl<SmsMapper, Sms> implements SmsSe
         SendSmsRequest request = new SendSmsRequest();
         // 必填:待发送手机号
         request.setPhoneNumbers(sms.getMobile());
+
+        Config signByCode = configService.getConfigByCode("SIGN");
         // 必填:短信签名-可在短信控制台中找到
-        request.setSignName("CoinExchange");
+        request.setSignName(signByCode.getValue());
         // 必填:短信模板-可在短信控制台中找到
-        request.setTemplateCode("SMS_211489881");
+        Config configByCode = configService.getConfigByCode(sms.getTemplateCode());
+        if (configByCode == null) {
+            throw new IllegalArgumentException("宁输入的签名不存在");
+        }
+        request.setTemplateCode(configByCode.getValue());
         // 可选:模板中的变量替换JSON串,如模板内容为"【企业级分布式应用服务】,您的验证码为${code}"时,此处的值为
-        request.setTemplateParam("{\"code\":\"" + 654321 + "\"}");
-        sms.setContent("654321");
+        String randomNumbers = RandomUtil.randomNumbers(6);
+        // 需要先把randomNumbers验证码波存在redis里面
+        // key SMS:VERIFY_OLD_PHONE:PHONE_NUMBER    value randomNumbers
+        redisTemplate.opsForValue().set("SMS:" + sms.getTemplateCode() + ":" + sms.getMobile(), randomNumbers, 5, TimeUnit.MINUTES);
+        request.setTemplateParam("{\"code\":\"" + randomNumbers + "\"}");
+
+        @NotBlank String desc = configByCode.getDesc();
+        String content = signByCode.getValue() + ":" + desc.replaceAll("\\$\\{code\\}", randomNumbers);
+        sms.setContent(content); // 短信内容 ${sign}验证码：${code}，您正在修改手机号或邮箱。10分钟内有效，请勿告诉他人
 
         return request;
     }

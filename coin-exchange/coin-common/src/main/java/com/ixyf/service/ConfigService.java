@@ -1,8 +1,9 @@
 package com.ixyf.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ixyf.domain.Config;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ixyf.domain.Config;
+
 public interface ConfigService extends IService<Config>{
 
     /**
@@ -14,4 +15,11 @@ public interface ConfigService extends IService<Config>{
      * @return
      */
     Page<Config> findByPage(Page<Config> page, String type, String code, String name);
+
+    /**
+     * 通过规则code查询签名
+     * @param sign
+     * @return
+     */
+    Config getConfigByCode(String sign);
 }

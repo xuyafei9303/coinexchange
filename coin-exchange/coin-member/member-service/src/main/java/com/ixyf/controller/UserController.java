@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
+import com.ixyf.form.UpdateLoginPasswordForm;
+import com.ixyf.form.UpdatePhoneForm;
 import com.ixyf.form.UserAuthForm;
 import com.ixyf.model.R;
 import com.ixyf.service.UserAuthAuditRecordService;
@@ -231,5 +233,47 @@ public class UserController {
         String stringUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         userService.authUser(Long.valueOf(stringUser), Arrays.asList(imgs));
         return R.ok();
+    }
+
+    @PostMapping("/updatePhone")
+    @ApiOperation(value = "修改手机号")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "updatePhoneForm", value = "updatePhoneForm json")
+    })
+    public R updatePhone(@RequestBody @Validated UpdatePhoneForm updatePhoneForm) {
+        String user = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        boolean updatePhone = userService.updatePhone(Long.valueOf(user), updatePhoneForm);
+        if (updatePhone) {
+            return R.ok();
+        }
+        return R.fail("更新手机号失败");
+    }
+
+    @GetMapping("/checkTel")
+    @ApiOperation(value = "检查新的手机号是否可用，如果可用，则给该新手机号发送验证码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "mobile", value = "手机号"),
+            @ApiImplicitParam(name = "countryCode", value = "国家区号")
+    })
+    public R checkNewPhone(@RequestParam(required = true) String mobile, @RequestParam(required = true) String countryCode) {
+        boolean check = userService.checkNewPhone(mobile, countryCode);
+        if (check) {
+            return R.ok();
+        }
+        return R.fail("手机号不可用,校验失败");
+    }
+
+    @PostMapping("/updateLoginPassword")
+    @ApiOperation(value = "修改密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "updateLoginPasswordForm", value = "updateLoginPasswordForm json")
+    })
+    public R updateLoginPassword(@RequestBody @Validated UpdateLoginPasswordForm updateLoginPasswordForm) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean update = userService.updateLoginPassword(userId, updateLoginPasswordForm);
+        if (update) {
+            return R.ok();
+        }
+        return R.fail("更新密码失败");
     }
 }
