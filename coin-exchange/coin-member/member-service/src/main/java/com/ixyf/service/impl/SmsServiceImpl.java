@@ -9,6 +9,7 @@ import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.ixyf.domain.Config;
 import com.ixyf.service.ConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -30,10 +31,10 @@ public class SmsServiceImpl extends ServiceImpl<SmsMapper, Sms> implements SmsSe
     @Resource
     private ISmsService iSmsService;
 
-    @Resource
+    @Autowired
     private ConfigService configService;
 
-    @Resource
+    @Autowired
     private StringRedisTemplate redisTemplate;
 
     @Override

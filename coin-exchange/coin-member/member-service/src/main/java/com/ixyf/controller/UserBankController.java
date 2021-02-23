@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -68,4 +69,11 @@ public class UserBankController {
         return R.fail("修改银行卡信息失败");
     }
 
+    @GetMapping("/current")
+    @ApiOperation(value = "查询当前用户的银行卡")
+    public R<UserBank> getCurrentUserBank() {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        UserBank userBank = userBankService.getCurrentUserBank(userId);
+        return R.ok(userBank);
+    }
 }

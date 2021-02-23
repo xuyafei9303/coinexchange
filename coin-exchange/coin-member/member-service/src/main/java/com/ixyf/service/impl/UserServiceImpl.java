@@ -45,7 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserAuthInfoService userAuthInfoService;
 
     @Resource
-    private SmsService smsService;
+    private SmsService coinSmsService; // 狗日的这里和阿里云sdk里面的重名了一直报错
 
     private final Snowflake snowflake = new Snowflake(IDGenConfig.appCode, IDGenConfig.machineCode);
 
@@ -158,7 +158,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         sms.setMobile(mobile);
         sms.setCountryCode(countryCode);
         sms.setTemplateCode("CHANGE_PHONE_VERIFY"); // 模板代码 CHANGE_PHONE_VERIFY
-        return smsService.sendSms(sms);
+        return coinSmsService.sendSms(sms);
     }
 
     @Override

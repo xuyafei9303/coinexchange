@@ -13,6 +13,15 @@ import com.ixyf.service.UserBankService;
 public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> implements UserBankService{
 
     @Override
+    public UserBank getCurrentUserBank(Long userId) {
+        return getOne(
+                new LambdaQueryWrapper<UserBank>()
+                        .eq(UserBank::getUserId, userId)
+                        .eq(UserBank::getStatus, 1)
+        );
+    }
+
+    @Override
     public Page<UserBank> findByPage(Page<UserBank> page, Long usrId) {
         return page(page, new LambdaQueryWrapper<UserBank>()
                 .eq(usrId != null, UserBank::getUserId, usrId)

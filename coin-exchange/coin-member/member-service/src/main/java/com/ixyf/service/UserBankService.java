@@ -13,4 +13,11 @@ public interface UserBankService extends IService<UserBank>{
      * @return
      */
     Page<UserBank> findByPage(Page<UserBank> page, Long usrId);
+
+    /**
+     * 根据用户id查询用户银行卡
+     * @param userId
+     * @return
+     */
+    UserBank getCurrentUserBank(Long userId);
 }
