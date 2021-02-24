@@ -106,4 +106,8 @@ public class UserBank {
     @TableField(value = "created", fill = FieldFill.INSERT)
     @ApiModelProperty(value="创建时间")
     private Date created;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "交易密码")
+    private String payPassword;
 }

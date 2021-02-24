@@ -1,6 +1,8 @@
 package com.ixyf.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.config.IDGenConfig;
@@ -8,8 +10,10 @@ import com.ixyf.config.IdenAuthenticationConfiguration;
 import com.ixyf.domain.Sms;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
+import com.ixyf.dto.UserDto;
 import com.ixyf.form.*;
 import com.ixyf.geetest.GeetestLib;
+import com.ixyf.mappers.UserDtoMapper;
 import com.ixyf.service.SmsService;
 import com.ixyf.service.UserAuthAuditRecordService;
 import com.ixyf.service.UserAuthInfoService;
@@ -162,6 +166,65 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public boolean register(RegisterForm registerForm) {
+        log.info("用户开始注册: registerForm = {}", JSON.toJSONString(registerForm, true));
+        @NotBlank String mobile = registerForm.getMobile();
+        @NotBlank String email = registerForm.getEmail();
+        // 简单校验
+        if (StringUtils.isEmpty(mobile) && StringUtils.isEmpty(email)) {
+            throw new IllegalArgumentException("手机号或邮箱不能同时为空");
+        }
+        int count = count(new LambdaQueryWrapper<User>()
+                .eq(!StringUtils.isEmpty(email), User::getEmail, email)
+                .eq(!StringUtils.isEmpty(mobile), User::getMobile, mobile)
+        );
+        if (count > 0) {
+            throw new IllegalArgumentException("手机号或者邮箱已经被注册");
+        }
+
+        registerForm.check(geetestLib, redisTemplate); // 极验验证
+        User user = getUser(registerForm); // 构建新用户
+
+        return save(user);
+    }
+
+    private User getUser(RegisterForm registerForm) {
+        // 注册
+        User user = new User();
+        user.setEmail(registerForm.getEmail());
+        user.setMobile(registerForm.getMobile());
+        String encode = new BCryptPasswordEncoder().encode(registerForm.getPassword());
+        user.setPassword(encode);
+        user.setPaypassSetting(false);
+        user.setStatus((byte)1);
+        user.setType((byte)1);
+        user.setAuthStatus((byte)0);
+        user.setLogins(0);
+        user.setInviteCode(RandomUtil.randomString(8)); // 用户邀请码
+        if (!StringUtils.isEmpty(registerForm.getInvitionCode())) {
+            User userPre = getOne(new LambdaQueryWrapper<User>().eq(User::getInviteCode, registerForm.getInvitionCode()));
+            if (userPre != null) {
+                user.setDirectInviteid(String.valueOf(userPre.getId())); // 邀请人id
+                user.setInviteRelation(String.valueOf(userPre.getId())); // 邀请人关系
+            }
+        }
+        return user;
+    }
+
+    @Override
+    public List<UserDto> getBasicUsers(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        List<User> list = list(new LambdaQueryWrapper<User>().in(User::getId, ids));
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        // 将user转换成userDto
+        return UserDtoMapper.INSTANCE.convert2Dto(list);
+    }
+
+    @Override
     public List<User> getUserInvites(Long userId) {
         List<User> users = list(new LambdaQueryWrapper<User>().eq(User::getDirectInviteid, userId));
         if (CollectionUtils.isEmpty(users)) {
@@ -263,7 +326,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     private void checkForm(UserAuthForm userAuthForm) {
-        userAuthForm.check(userAuthForm, geetestLib, redisTemplate);
+        userAuthForm.check(geetestLib, redisTemplate);
     }
 
     @Override
@@ -303,5 +366,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setSeniorAuthStatus(seniorAuthStatus);
         user.setSeniorAuthDesc(seniorAuthDesc);
         return user;
+    }
+
+
+    // TODO ENCODE
+    public static void main(String[] args) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encode = passwordEncoder.encode("XYF701030x");
+        System.out.println("encode = " + encode);
     }
 }

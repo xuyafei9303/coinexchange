@@ -76,4 +76,18 @@ public class UserBankController {
         UserBank userBank = userBankService.getCurrentUserBank(userId);
         return R.ok(userBank);
     }
+
+    @PostMapping("/bind")
+    @ApiOperation(value = "绑定银行卡")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userBank", value = "userBank json")
+    })
+    public R bindBank(@RequestBody @Validated UserBank userBank) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean bind = userBankService.bindBank(userId, userBank);
+        if (bind) {
+            return R.ok();
+        }
+        return R.fail("绑定银行卡失败");
+    }
 }

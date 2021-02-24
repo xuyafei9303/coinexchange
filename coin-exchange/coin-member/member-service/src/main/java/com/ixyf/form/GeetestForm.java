@@ -33,16 +33,16 @@ public class GeetestForm {
 
     private String uuid;
 
-    public void check(GeetestForm geetestForm, GeetestLib geetestLib, RedisTemplate<String, Object> redisTemplate) {
-        String challenge = geetestForm.getGeetest_challenge();
-        String validate = geetestForm.getGeetest_validate();
-        String seccode = geetestForm.getGeetest_seccode();
+    public void check(GeetestLib geetestLib, RedisTemplate<String, Object> redisTemplate) {
+        String challenge = this.getGeetest_challenge();
+        String validate = this.getGeetest_validate();
+        String seccode = this.getGeetest_seccode();
         int status = 0;
         String userId = "";
         // 检测存入redis中的极验云状态标识
         String stringStatus = Objects.requireNonNull(redisTemplate.opsForValue().get(GeetestLib.GEETEST_SERVER_STATUS_SESSION_KEY)).toString();
         status = Integer.parseInt(stringStatus);
-        userId = Objects.requireNonNull(redisTemplate.opsForValue().get(GeetestLib.GEETEST_SERVER_USER_KEY + ":" + geetestForm.getUuid())).toString();
+        userId = Objects.requireNonNull(redisTemplate.opsForValue().get(GeetestLib.GEETEST_SERVER_USER_KEY + ":" + this.getUuid())).toString();
         GeetestLibResult result = null;
         assert false;
         if (status == 1) {
@@ -58,7 +58,7 @@ public class GeetestForm {
         }
         // 注意，不要更改返回的结构和值类型
         if (result.getStatus() != 1) {
-            log.info("验证码验证异常:", JSON.toJSONString(result, true));
+            log.info("验证码验证异常: {}", JSON.toJSONString(result, true));
             throw new IllegalArgumentException("验证码验证异常");
         }
     }

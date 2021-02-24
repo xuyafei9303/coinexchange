@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.ixyf.domain.UserAuthAuditRecord;
 import com.ixyf.domain.UserAuthInfo;
+import com.ixyf.dto.UserDto;
+import com.ixyf.feign.UserServiceFeign;
 import com.ixyf.form.*;
 import com.ixyf.model.R;
 import com.ixyf.service.UserAuthAuditRecordService;
@@ -35,7 +37,7 @@ import java.util.List;
 @RestController
 @Api(tags = "会员中心")
 @RequestMapping("/users")
-public class UserController {
+public class UserController implements UserServiceFeign {
 
     @Autowired
     private UserService userService;
@@ -310,5 +312,23 @@ public class UserController {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         List<User> userList = userService.getUserInvites(userId);
         return R.ok(userList);
+    }
+
+    @PostMapping("/register")
+    @ApiOperation(value = "用户注册")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "registerForm", value = "registerForm json")
+    })
+    public R register(@RequestBody @Validated RegisterForm registerForm) {
+        boolean register = userService.register(registerForm);
+        if (register) {
+            return R.ok();
+        }
+        return R.fail("注册失败");
+    }
+
+    @Override
+    public List<UserDto> getBasicUsers(List<Long> ids) {
+        return userService.getBasicUsers(ids);
     }
 }

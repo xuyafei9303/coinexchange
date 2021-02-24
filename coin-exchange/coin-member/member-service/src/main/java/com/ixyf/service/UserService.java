@@ -3,6 +3,7 @@ package com.ixyf.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ixyf.dto.UserDto;
 import com.ixyf.form.*;
 
 import java.util.List;
@@ -100,4 +101,18 @@ public interface UserService extends IService<User>{
      * @return
      */
     List<User> getUserInvites(Long userId);
+
+    /**
+     * 通过用户的id批量查询用户信息
+     * @param ids
+     * @return
+     */
+    List<UserDto> getBasicUsers(List<Long> ids);
+
+    /**
+     * 用户注册
+     * @param registerForm
+     * @return
+     */
+    boolean register(RegisterForm registerForm);
 }

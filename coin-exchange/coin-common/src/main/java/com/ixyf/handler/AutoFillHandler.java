@@ -57,6 +57,9 @@ public class AutoFillHandler implements MetaObjectHandler {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             String auth = authentication.getPrincipal().toString();
+            if ("anonymousUser".equals(auth)) {
+                return null;
+            }
             return Long.valueOf(auth);
         }
         return null;
