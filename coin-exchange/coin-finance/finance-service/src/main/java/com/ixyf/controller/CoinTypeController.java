@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 权限：
@@ -87,5 +88,16 @@ public class CoinTypeController {
             return R.ok();
         }
         return R.fail("设置币种状态失败");
+    }
+
+    @GetMapping("/all")
+    @ApiOperation(value = "查询所有币种类型")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "status", value = "币种状态")
+    })
+    @PreAuthorize("hasAuthority('trade_coin_type_query')")
+    public R<List<CoinType>> findAllCoinTypesByStatus(Byte status) {
+        List<CoinType> coinTypeList = coinTypeService.findAllCoinTypesByStatus(status);
+        return R.ok(coinTypeList);
     }
 }

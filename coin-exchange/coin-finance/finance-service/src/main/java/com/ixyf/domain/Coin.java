@@ -106,12 +106,11 @@ qbb：钱包币
     private BigDecimal dayMaxAmount;
 
     /**
-     * status=1：启用
-0：禁用
+     * status=1：启用 0：禁用
      */
     @TableField(value = "status")
     @ApiModelProperty(value="status=1：启用,0：禁用")
-    private Boolean status;
+    private Byte status;
 
     /**
      * 自动转出数量

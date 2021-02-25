@@ -18,4 +18,9 @@ public class CoinTypeServiceImpl extends ServiceImpl<CoinTypeMapper, CoinType> i
     public Page<CoinType> findByPage(Page<CoinType> page, String code) {
         return page(page, new LambdaQueryWrapper<CoinType>().like(!StringUtils.isEmpty(code), CoinType::getCode, code));
     }
+
+    @Override
+    public List<CoinType> findAllCoinTypesByStatus(Byte status) {
+        return list(new LambdaQueryWrapper<CoinType>().eq(status != null, CoinType::getStatus, status));
+    }
 }
