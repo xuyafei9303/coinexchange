@@ -10,6 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /**
     * 平台归账手续费等账户
     */
@@ -31,6 +34,7 @@ public class AdminAddress {
      */
     @TableField(value = "coin_id")
     @ApiModelProperty(value="币种Id")
+    @NotNull
     private Long coinId;
 
     /**
@@ -66,5 +70,6 @@ public class AdminAddress {
      */
     @TableField(value = "coin_type")
     @ApiModelProperty(value="类型")
+//    @NotBlank
     private String coinType;
 }

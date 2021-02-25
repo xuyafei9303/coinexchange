@@ -10,4 +10,11 @@ public interface CoinConfigService extends IService<CoinConfig>{
      * @return
      */
     CoinConfig findByCoinId(Long coinId);
+
+    /**
+     * 新增or修改币种配置
+     * @param coinConfig
+     * @return
+     */
+    boolean updateOrSave(CoinConfig coinConfig);
 }

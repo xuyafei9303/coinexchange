@@ -8,9 +8,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
@@ -33,5 +32,31 @@ public class AdminAddressController {
     public R<Page<AdminAddress>> findPage(@ApiIgnore Page<AdminAddress> page, Long coinId) {
         Page<AdminAddress> addressPage = adminAddressService.findByPage(page, coinId);
         return R.ok(addressPage);
+    }
+
+    @PostMapping
+    @ApiOperation(value = "新增归集地址")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "adminAddress", value = "adminAddress json")
+    })
+    public R save(@RequestBody @Validated AdminAddress adminAddress) {
+        boolean save = adminAddressService.save(adminAddress);
+        if (save) {
+            return R.ok();
+        }
+        return R.fail("新增归集地址失败");
+    }
+
+    @PatchMapping
+    @ApiOperation(value = "修改归集地址")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "adminAddress", value = "adminAddress json")
+    })
+    public R update(@RequestBody @Validated AdminAddress adminAddress) {
+        boolean update = adminAddressService.updateById(adminAddress);
+        if (update) {
+            return R.ok();
+        }
+        return R.fail("修改归集地址失败");
     }
 }
