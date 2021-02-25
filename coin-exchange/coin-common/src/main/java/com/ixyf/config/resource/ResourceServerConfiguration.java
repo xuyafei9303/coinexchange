@@ -29,6 +29,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers(
                         "/users/register",
+                        "/users/setPassword",
+                        "/sms/sendTo",
                         "/gt/register",
                         "/login",
                         "/v2/api-docs",

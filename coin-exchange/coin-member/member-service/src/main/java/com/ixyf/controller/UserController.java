@@ -303,7 +303,7 @@ public class UserController implements UserServiceFeign {
         if (reset) {
             return R.ok();
         }
-        return R.fail("重置密码失败");
+        return R.fail("重置交易密码失败");
     }
 
     @GetMapping("/invites")
@@ -325,6 +325,19 @@ public class UserController implements UserServiceFeign {
             return R.ok();
         }
         return R.fail("注册失败");
+    }
+
+    @PostMapping("/setPassword")
+    @ApiOperation(value = "重置登录密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "resetPasswordForm", value = "resetPasswordForm json")
+    })
+    public R reSetPassword(@RequestBody @Validated ResetPasswordForm resetPasswordForm) {
+        boolean reset = userService.reSetLoginPassword(resetPasswordForm);
+        if (reset) {
+            return R.ok();
+        }
+        return R.fail("重置登录密码失败");
     }
 
     @Override

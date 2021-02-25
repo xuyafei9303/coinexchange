@@ -166,6 +166,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public boolean reSetLoginPassword(ResetPasswordForm resetPasswordForm) {
+        log.info("开始重置登录密码 {}", JSON.toJSONString(resetPasswordForm, true));
+        // 极验校验
+        resetPasswordForm.check(geetestLib, redisTemplate);
+        // 手机号码校验
+        String phoneValidateCode = (String) redisTemplate.opsForValue().get("SMS:FORGOT_VERIFY:" + resetPasswordForm.getMobile());
+        if (!resetPasswordForm.getValidateCode().equals(phoneValidateCode)) {
+            throw new IllegalArgumentException("验证码错误");
+        }
+        // 数据库数据校验
+        @NotBlank String mobile = resetPasswordForm.getMobile();
+        User user = getOne(new LambdaQueryWrapper<User>().eq(User::getMobile, mobile));
+        if (user == null) {
+            throw new IllegalArgumentException(("手机号错误 该用户不存在"));
+        }
+        user.setPassword(new BCryptPasswordEncoder().encode(resetPasswordForm.getPassword()));
+        return updateById(user);
+    }
+
+    @Override
     public boolean register(RegisterForm registerForm) {
         log.info("用户开始注册: registerForm = {}", JSON.toJSONString(registerForm, true));
         @NotBlank String mobile = registerForm.getMobile();

@@ -115,4 +115,11 @@ public interface UserService extends IService<User>{
      * @return
      */
     boolean register(RegisterForm registerForm);
+
+    /**
+     * 重置登录密码
+     * @param resetPasswordForm
+     * @return
+     */
+    boolean reSetLoginPassword(ResetPasswordForm resetPasswordForm);
 }

@@ -58,7 +58,7 @@ public class LoginServiceImpl implements LoginService {
      * @param loginForm
      */
     private void checkFormData(LoginForm loginForm) {
-        loginForm.check(loginForm, geetestLib, redisTemplate);
+        loginForm.check(geetestLib, redisTemplate);
 
     }
 }
