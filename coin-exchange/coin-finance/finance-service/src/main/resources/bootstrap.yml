@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: finance-service
+  cloud:
+    nacos:
+      server-addr: nacos-server:8848
+      config:
+        file-extension: yaml
+  profiles:
+    active: dev # finance-service-dev.yaml
