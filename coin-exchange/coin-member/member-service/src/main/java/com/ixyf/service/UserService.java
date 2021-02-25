@@ -7,6 +7,7 @@ import com.ixyf.dto.UserDto;
 import com.ixyf.form.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService extends IService<User>{
 
@@ -107,7 +108,9 @@ public interface UserService extends IService<User>{
      * @param ids
      * @return
      */
-    List<UserDto> getBasicUsers(List<Long> ids);
+//    List<UserDto> getBasicUsers(List<Long> ids);
+    Map<Long, UserDto> getBasicUsers(List<Long> ids, String userName, String mobile);
+
 
     /**
      * 用户注册

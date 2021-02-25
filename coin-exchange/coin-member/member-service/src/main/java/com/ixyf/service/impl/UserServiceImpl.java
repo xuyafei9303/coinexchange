@@ -25,10 +25,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ixyf.domain.User;
 import com.ixyf.mapper.UserMapper;
@@ -231,17 +230,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
+    /**
+     * 通过用户的信息查询用户
+     * @param ids 远程调用时批量获取
+     * @param userName 使用用户名查询一系列用户的集合
+     * @param mobile 使用手机号码查询一系列用户的集合
+     * @return
+     */
     @Override
-    public List<UserDto> getBasicUsers(List<Long> ids) {
-        if (CollectionUtils.isEmpty(ids)) {
-            return Collections.emptyList();
+    public Map<Long, UserDto> getBasicUsers(List<Long> ids, String userName, String mobile) {
+        if (CollectionUtils.isEmpty(ids) && StringUtils.isEmpty(userName) && StringUtils.isEmpty(mobile)) {
+            return Collections.emptyMap();
         }
-        List<User> list = list(new LambdaQueryWrapper<User>().in(User::getId, ids));
+        List<User> list = list(new LambdaQueryWrapper<User>()
+                .in(User::getId, ids)
+                .like(!StringUtils.isEmpty(userName), User::getUsername, userName)
+                .like(!StringUtils.isEmpty(mobile), User::getMobile, mobile)
+        );
         if (CollectionUtils.isEmpty(list)) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         // 将user转换成userDto
-        return UserDtoMapper.INSTANCE.convert2Dto(list);
+        List<UserDto> userDtoList = UserDtoMapper.INSTANCE.convert2Dto(list);
+        Map<Long, UserDto> userDtoMap = userDtoList.stream().collect(Collectors.toMap(UserDto::getId, userDto -> userDto));
+
+        return userDtoMap;
     }
 
     @Override

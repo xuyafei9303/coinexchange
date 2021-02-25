@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * user_query
@@ -340,8 +341,13 @@ public class UserController implements UserServiceFeign {
         return R.fail("重置登录密码失败");
     }
 
+//    @Override
+//    public List<UserDto> getBasicUsers(List<Long> ids) {
+//        return userService.getBasicUsers(ids);
+//    }
+
     @Override
-    public List<UserDto> getBasicUsers(List<Long> ids) {
-        return userService.getBasicUsers(ids);
+    public Map<Long, UserDto> getBasicUsers(List<Long> ids, String userName, String mobile) {
+        return null;
     }
 }
