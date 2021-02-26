@@ -32,7 +32,6 @@ public class CoinWithdrawServiceImpl extends ServiceImpl<CoinWithdrawMapper, Coi
      * 数字货币提现记录分页查询
      *
      * @param page
-     * @param coinId
      * @param userId
      * @param userName
      * @param mobile
@@ -44,7 +43,7 @@ public class CoinWithdrawServiceImpl extends ServiceImpl<CoinWithdrawMapper, Coi
      * @return
      */
     @Override
-    public Page<CoinWithdraw> findByPage(Page<CoinWithdraw> page, Long coinId, Long userId, String userName, String mobile, Byte status, String numMin, String numMax, String startTime, String endTime) {
+    public Page<CoinWithdraw> findByPage(Page<CoinWithdraw> page,Long coinId, Long userId, String userName, String mobile, Byte status, String numMin, String numMax, String startTime, String endTime) {
         LambdaQueryWrapper<CoinWithdraw> queryWrapper = new LambdaQueryWrapper<>();
 
         // 如果本次查询中带了用户信息userId / userName / mobile ,本质就是要把用户的id 放在查询条件里面

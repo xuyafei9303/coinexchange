@@ -1,6 +1,7 @@
 package com.ixyf.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ixyf.domain.CashWithdrawals;
 import com.ixyf.domain.CoinRecharge;
 import com.ixyf.domain.CoinWithdraw;
 import com.ixyf.model.R;
@@ -29,7 +30,7 @@ public class CoinWithdrawController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "current", value = "当前页"),
             @ApiImplicitParam(name = "size", value = "每页显示条数"),
-            @ApiImplicitParam(name = "coinId", value = "币种id"),
+            @ApiImplicitParam(name = "coinId", value = "当前页"),
             @ApiImplicitParam(name = "userId", value = "用户id"),
             @ApiImplicitParam(name = "userName", value = "用户名"),
             @ApiImplicitParam(name = "mobile", value = "用户手机号"),
@@ -47,4 +48,6 @@ public class CoinWithdrawController {
         Page<CoinWithdraw> coinWithdrawPage = coinWithdrawService.findByPage(page, coinId, userId, userName, mobile, status, numMin, numMax, startTime, endTime);
         return R.ok(coinWithdrawPage);
     }
+
+
 }

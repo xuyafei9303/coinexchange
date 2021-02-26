@@ -9,7 +9,6 @@ public interface CoinWithdrawService extends IService<CoinWithdraw>{
     /**
      * 数字货币提现记录分页查询
      * @param page
-     * @param coinId
      * @param userId
      * @param userName
      * @param mobile
