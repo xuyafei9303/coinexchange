@@ -101,4 +101,18 @@ public class CoinRecharge {
     @TableField(value = "created")
     @ApiModelProperty(value="创建时间")
     private Date created;
+
+    /**
+     * 用户名。
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value="用户名")
+    private String username;
+
+    /**
+     * 用户真实姓名
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value="用户真实姓名")
+    private String realName;
 }

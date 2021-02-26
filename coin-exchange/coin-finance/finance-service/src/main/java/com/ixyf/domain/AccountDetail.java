@@ -103,12 +103,12 @@ public class AccountDetail {
 
     /**
      * 流水状态：
-充值
-提现
-冻结
-解冻
-转出
-转入
+        充值
+        提现
+        冻结
+        解冻
+        转出
+        转入
      */
     @TableField(value = "remark")
     @ApiModelProperty(value="流水状态：,充值,提现,冻结,解冻,转出,转入")
@@ -120,4 +120,18 @@ public class AccountDetail {
     @TableField(value = "created")
     @ApiModelProperty(value="日期")
     private Date created;
+
+    /**
+     * 用户名。
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value="用户名")
+    private String username;
+
+    /**
+     * 用户真实姓名
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value="用户真实姓名")
+    private String realName;
 }
