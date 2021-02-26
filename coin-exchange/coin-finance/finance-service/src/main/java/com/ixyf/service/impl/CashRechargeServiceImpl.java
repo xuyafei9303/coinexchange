@@ -32,6 +32,9 @@ public class CashRechargeServiceImpl extends ServiceImpl<CashRechargeMapper, Cas
         Map<Long, UserDto> basicUsers = null;
         if (userId != null || !StringUtils.isEmpty(userName) || !StringUtils.isEmpty(mobile)) { // 使用用户的信息进行查询
             basicUsers = userServiceFeign.getBasicUsers(userId == null ? null : Collections.singletonList(userId), userName, mobile);
+            if (CollectionUtils.isEmpty(basicUsers)) { // 找不到该类用户
+                return page;
+            }
             Set<Long> userIds = basicUsers.keySet();// 远程调用查询用户
             queryWrapper.in(!CollectionUtils.isEmpty(userIds), CashRecharge::getUserId, userIds);
         }
@@ -56,17 +59,18 @@ public class CashRechargeServiceImpl extends ServiceImpl<CashRechargeMapper, Cas
         List<CashRecharge> records = cashRechargePage.getRecords();
         if (!CollectionUtils.isEmpty(records)) {
             if (CollectionUtils.isEmpty(basicUsers)) {
-                List<Long> ids = records.stream().map(cashRecharge -> cashRecharge.getUserId()).collect(Collectors.toList());
+                List<Long> ids = records.stream().map(CashRecharge::getUserId).collect(Collectors.toList());
                 basicUsers = userServiceFeign.getBasicUsers(ids, null, null);
             }
             Map<Long, UserDto> finalBasicUsers = basicUsers;
             records.forEach(cashRecharge -> {
                 UserDto userDto = finalBasicUsers.get(cashRecharge.getUserId());
-                cashRecharge.setUsername(userDto.getUsername());
-                cashRecharge.setRealName(userDto.getRealName());
+                if (userDto != null) {
+                    cashRecharge.setUsername(userDto.getUsername());
+                    cashRecharge.setRealName(userDto.getRealName());
+                }
             });
         }
-
         return cashRechargePage;
     }
 }

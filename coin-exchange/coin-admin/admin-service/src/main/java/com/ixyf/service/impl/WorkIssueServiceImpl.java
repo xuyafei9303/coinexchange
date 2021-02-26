@@ -37,18 +37,19 @@ public class WorkIssueServiceImpl extends ServiceImpl<WorkIssueMapper, WorkIssue
         // 先批量收集id
         List<Long> userIds = records.stream().map(WorkIssue::getUserId).collect(Collectors.toList());
         // 远程调用
-        List<UserDto> basicUsers = userServiceFeign.getBasicUsers(userIds);
-        if (CollectionUtils.isEmpty(basicUsers)) {
-            return workIssuePage;
-        }
-        Map<Long, UserDto> idMapUserDtos = basicUsers.stream().collect(
-                        Collectors.toMap(
-                                UserDto::getId,  // key
-                                userDto -> userDto // value
-                        )
-                );
+//        List<UserDto> basicUsers = userServiceFeign.getBasicUsers(userIds);
+//        if (CollectionUtils.isEmpty(basicUsers)) {
+//            return workIssuePage;
+//        }
+//        Map<Long, UserDto> idMapUserDtos = basicUsers.stream().collect(
+//                        Collectors.toMap(
+//                                UserDto::getId,  // key
+//                                userDto -> userDto // value
+//                        )
+//                );
+        Map<Long, UserDto> basicUsers = userServiceFeign.getBasicUsers(userIds, null, null);
         records.forEach(workIssue -> { // 循环每一个workIssue 并给他设置用户信息
-            UserDto userDto = idMapUserDtos.get(workIssue.getUserId());
+            UserDto userDto = basicUsers.get(workIssue.getUserId());
             workIssue.setUsername(userDto == null ? "测试用户" : userDto.getUsername());
             workIssue.setRealName(userDto == null ? "测试用户" : userDto.getRealName());
         });

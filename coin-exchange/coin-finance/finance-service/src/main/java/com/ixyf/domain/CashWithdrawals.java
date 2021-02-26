@@ -153,4 +153,18 @@ public class CashWithdrawals {
     @TableField(value = "last_time")
     @ApiModelProperty(value="最后确认提现到账时间")
     private Date lastTime;
+
+    /**
+     * 用户名。
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value="用户名")
+    private String username;
+
+    /**
+     * 用户真实姓名
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value="用户真实姓名")
+    private String realName;
 }
