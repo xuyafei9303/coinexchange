@@ -141,4 +141,17 @@ public class CashRechargeServiceImpl extends ServiceImpl<CashRechargeMapper, Cas
         });
         return tryLockAndRun;
     }
+
+    /**
+     * 查询当前用户的充值状态
+     *
+     * @param page
+     * @param userId
+     * @param status
+     * @return
+     */
+    @Override
+    public Page<CashRecharge> findUserCashRecharge(Page<CashRecharge> page, Long userId, Byte status) {
+        return page(page, new LambdaQueryWrapper<CashRecharge>().eq(CashRecharge::getUserId, userId).eq(status != null, CashRecharge::getStatus, status));
+    }
 }

@@ -30,4 +30,13 @@ public interface CashRechargeService extends IService<CashRecharge>{
      * @return
      */
     boolean cashRechargeAudit(Long userId, CashRechargeAuditRecord cashRechargeAuditRecord);
+
+    /**
+     * 查询当前用户的充值状态
+     * @param page
+     * @param userId
+     * @param status
+     * @return
+     */
+    Page<CashRecharge> findUserCashRecharge(Page<CashRecharge> page, Long userId, Byte status);
 }
