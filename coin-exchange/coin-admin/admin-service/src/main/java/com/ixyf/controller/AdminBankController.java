@@ -2,6 +2,8 @@ package com.ixyf.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.AdminBank;
+import com.ixyf.dto.AdminBankDto;
+import com.ixyf.feign.AdminBankServiceFeign;
 import com.ixyf.model.R;
 import com.ixyf.service.AdminBankService;
 import io.swagger.annotations.Api;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * admin_bank_query
@@ -24,7 +27,7 @@ import javax.annotation.Resource;
 @RestController
 @Api(tags = "公司银行卡管理")
 @RequestMapping("/adminBanks")
-public class AdminBankController {
+public class AdminBankController implements AdminBankServiceFeign {
 
     @Resource
     private AdminBankService adminBankService;
@@ -86,5 +89,10 @@ public class AdminBankController {
             return R.ok();
         }
         return R.fail("状态修改失败");
+    }
+
+    @Override
+    public List<AdminBankDto> getAllAdminBanks() {
+        return adminBankService.getAllAdminBanks();
     }
 }

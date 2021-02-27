@@ -3,9 +3,11 @@ package com.ixyf.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRecharge;
 import com.ixyf.domain.CashRechargeAuditRecord;
+import com.ixyf.model.CashParam;
 import com.ixyf.model.R;
 import com.ixyf.service.CashRechargeService;
 import com.ixyf.utils.ReportCsvUtils;
+import com.ixyf.vo.CashTradeVo;
 import io.swagger.annotations.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
@@ -200,5 +202,17 @@ public class CashRechargeController {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         Page<CashRecharge> rechargePage = cashRechargeService.findUserCashRecharge(page, userId, status);
         return R.ok(rechargePage);
+    }
+
+    @PostMapping("/buy")
+    @ApiOperation(value = "GCN充值")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cashParam", value = "cashParam json")
+    })
+    public R<CashTradeVo> buy(@RequestBody @Validated CashParam cashParam) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        CashTradeVo cashTradeVo = cashRechargeService.buy(userId, cashParam);
+
+        return R.ok(cashTradeVo);
     }
 }

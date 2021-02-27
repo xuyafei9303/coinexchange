@@ -10,9 +10,9 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 /**
- * 用来做对象关系映射转化 shabiwanyier
+ * 用来做对象关系映射转化 shabiwanyier 必须在使用的这个服务里面引入依赖 继承的也不行！！！
  */
-@Mapper()
+@Mapper(componentModel = "spring")
 public interface UserDtoMapper {
 
     // 获取实例

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRecharge;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ixyf.domain.CashRechargeAuditRecord;
+import com.ixyf.model.CashParam;
+import com.ixyf.vo.CashTradeVo;
 
 public interface CashRechargeService extends IService<CashRecharge>{
 
@@ -39,4 +41,12 @@ public interface CashRechargeService extends IService<CashRecharge>{
      * @return
      */
     Page<CashRecharge> findUserCashRecharge(Page<CashRecharge> page, Long userId, Byte status);
+
+    /**
+     * 进行GCN购买的返回结果
+     * @param userId
+     * @param cashParam
+     * @return
+     */
+    CashTradeVo buy(Long userId, CashParam cashParam);
 }

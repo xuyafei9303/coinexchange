@@ -1,18 +1,31 @@
 package com.ixyf.service.impl;
 
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.RandomUtil;
 import com.alicp.jetcache.Cache;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.CreateCache;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRechargeAuditRecord;
+import com.ixyf.domain.Coin;
+import com.ixyf.domain.Config;
+import com.ixyf.dto.AdminBankDto;
 import com.ixyf.dto.UserDto;
+import com.ixyf.feign.AdminBankServiceFeign;
 import com.ixyf.feign.UserServiceFeign;
 import com.ixyf.mapper.CashRechargeAuditRecordMapper;
+import com.ixyf.model.CashParam;
 import com.ixyf.service.AccountService;
+import com.ixyf.service.CoinService;
+import com.ixyf.service.ConfigService;
+import com.ixyf.vo.CashTradeVo;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -34,7 +47,19 @@ public class CashRechargeServiceImpl extends ServiceImpl<CashRechargeMapper, Cas
     private CashRechargeAuditRecordMapper cashRechargeAuditRecordMapper;
 
     @Resource
+    private ConfigService configService;
+
+    @Resource
     private AccountService accountService;
+
+    @Resource
+    private AdminBankServiceFeign adminBankServiceFeign;
+
+    @Resource
+    private CoinService coinService;
+
+    @Resource
+    private Snowflake snowflake;
 
     @CreateCache(name = "CASH_RECHARGE_LOCK:", expire = 100, timeUnit = TimeUnit.SECONDS, cacheType = CacheType.BOTH)
     private Cache<String, String> cache;
@@ -153,5 +178,94 @@ public class CashRechargeServiceImpl extends ServiceImpl<CashRechargeMapper, Cas
     @Override
     public Page<CashRecharge> findUserCashRecharge(Page<CashRecharge> page, Long userId, Byte status) {
         return page(page, new LambdaQueryWrapper<CashRecharge>().eq(CashRecharge::getUserId, userId).eq(status != null, CashRecharge::getStatus, status));
+    }
+
+    /**
+     * 进行GCN购买的返回结果
+     *
+     * @param userId
+     * @param cashParam
+     * @return
+     */
+    @Override
+    public CashTradeVo buy(Long userId, CashParam cashParam) {
+
+        // 校验现金参数
+        checkCashParam(cashParam);
+        // 查询公司的银行卡
+        List<AdminBankDto> allAdminBanks = adminBankServiceFeign.getAllAdminBanks();
+        // 只需要一张银行卡就行
+        AdminBankDto adminBankDto = loadBalance(allAdminBanks);
+        // 生成订单号 参考号
+        String nextId = String.valueOf(snowflake.nextId());
+        String remark = RandomUtil.randomNumbers(6);
+        // 在数据库插入一条充值记录
+        CashRecharge cashRecharge = new CashRecharge();
+        cashRecharge.setUserId(userId);
+        assert adminBankDto != null;
+        // 银行卡信息
+        cashRecharge.setName(adminBankDto.getName());
+        cashRecharge.setBankName(adminBankDto.getBankName());
+        cashRecharge.setBankCard(adminBankDto.getBankCard());
+
+        Coin coinServiceById = coinService.getById(cashParam.getCoinId());
+        if (coinServiceById == null) {
+            throw new IllegalArgumentException("id不存在");
+        }
+
+        Config buyCGNRate = configService.getConfigByCode("CNY2USDT");
+        // 这里必须自己在数据库查取 前端不可靠
+        BigDecimal realMum = cashParam.getMum().multiply(new BigDecimal(buyCGNRate.getValue())).setScale(2, RoundingMode.HALF_UP);
+
+        cashRecharge.setTradeno(nextId);
+        cashRecharge.setCoinId(cashParam.getCoinId());
+        cashRecharge.setCoinName(coinServiceById.getName());
+        cashRecharge.setNum(cashParam.getNum());
+        cashRecharge.setMum(realMum);
+        cashRecharge.setFee(BigDecimal.ZERO);
+        cashRecharge.setType("linepay"); // 支付方式 ： 在线支付
+        cashRecharge.setStatus((byte) 0); // 待审核
+        cashRecharge.setStep((byte) 1); // 第一级别
+
+        boolean save = save(cashRecharge);
+        if (save) {
+            // 返回
+            CashTradeVo cashTradeVo = new CashTradeVo();
+            // 收户行 信息
+            cashTradeVo.setAmount(realMum);
+            cashTradeVo.setStatus((byte) 0);
+            cashTradeVo.setBankName(adminBankDto.getBankName());
+            cashTradeVo.setBankCard(adminBankDto.getBankCard());
+            cashTradeVo.setName(adminBankDto.getName());
+            cashTradeVo.setRemark(remark);
+            return cashTradeVo;
+        }
+        return null;
+    }
+
+    /**
+     * 随机选择一个银行卡进行交易
+     * @param allAdminBanks
+     * @return
+     */
+    private AdminBankDto loadBalance(List<AdminBankDto> allAdminBanks) {
+        if (CollectionUtils.isEmpty(allAdminBanks)) {
+            throw new IllegalArgumentException("没有发现可用的银行卡");
+        }
+        if (allAdminBanks.size() == 1) {
+            return allAdminBanks.get(0);
+        }
+        Random random = new Random();
+        return allAdminBanks.get(random.nextInt(allAdminBanks.size()));
+    }
+
+    private void checkCashParam(CashParam cashParam) {
+        @NotNull BigDecimal cashParamNum = cashParam.getNum(); // 现金充值数量
+        Config cashParamNumCode = configService.getConfigByCode("WITH_DROW");
+        @NotBlank String numCodeValue = cashParamNumCode.getValue();
+        BigDecimal min = new BigDecimal(numCodeValue);
+        if (cashParamNum.compareTo(min) >= 0) {
+            throw new IllegalArgumentException("充值数量太小，小于最新充值数量");
+        }
     }
 }

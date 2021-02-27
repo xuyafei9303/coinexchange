@@ -30,6 +30,16 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-jdk8</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+
 <!--        阿里云对象存储-->
 <!--
 用户登录名称 coin-exchange-xyf@1418532166959814.onaliyun.com
