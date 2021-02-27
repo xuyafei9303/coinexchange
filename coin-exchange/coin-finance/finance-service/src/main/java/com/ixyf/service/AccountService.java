@@ -33,4 +33,12 @@ public interface AccountService extends IService<Account>{
      * @return
      */
     boolean decreaseAccountAmount(Long adminId, Long userId, Long coinId, Long orderNum, BigDecimal num, BigDecimal fee, String remark, String businessType, Byte direction);
+
+    /**
+     * 根据用户查询用户资产
+     * @param userId 用户id
+     * @param coinName 币种名称
+     * @return 货币资产
+     */
+    Account findByUserAndCoin(Long userId, String coinName);
 }

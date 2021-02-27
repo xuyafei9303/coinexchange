@@ -26,4 +26,11 @@ public interface CoinService extends IService<Coin>{
      * @return
      */
     List<Coin> getCoinsByStatus(Byte status);
+
+    /**
+     * 根据货币名称查询货币
+     * @param coinName 货币名称是唯一的
+     * @return
+     */
+    Coin getCoinByCoinName(String coinName);
 }

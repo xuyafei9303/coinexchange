@@ -2,7 +2,11 @@ package com.ixyf.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ixyf.domain.AccountDetail;
+import com.ixyf.domain.Coin;
+import com.ixyf.domain.Config;
 import com.ixyf.service.AccountDetailService;
+import com.ixyf.service.CoinService;
+import com.ixyf.service.ConfigService;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -17,6 +21,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
     @Resource
     private AccountDetailService accountDetailService;
+
+    @Resource
+    private CoinService coinService;
+
+    @Resource
+    private ConfigService _configService;
 
     /**
      * 给用户扣减钱
@@ -62,6 +72,32 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             }
         }
         return false;
+    }
+
+    /**
+     * 根据用户查询用户资产
+     *
+     * @param userId   用户id
+     * @param coinName 币种名称
+     * @return 货币资产
+     */
+    @Override
+    public Account findByUserAndCoin(Long userId, String coinName) {
+        Coin coin = coinService.getCoinByCoinName(coinName);
+        if (coin == null) {
+            throw new IllegalArgumentException("货币不存在");
+        }
+        Account account = getOne(new LambdaQueryWrapper<Account>().eq(Account::getUserId, userId).eq(Account::getCoinId, coin.getId()));
+        if (account == null) {
+            throw new IllegalArgumentException("该资产不存在");
+        }
+        Config buyRateConfigByCode = _configService.getConfigByCode("CNY2USDT");
+        account.setBuyRate(new BigDecimal(buyRateConfigByCode.getValue())); // 买进比率
+
+        Config sellRateConfigByCode = _configService.getConfigByCode("USDT2CNY");
+        account.setSellRate(new BigDecimal(sellRateConfigByCode.getValue())); // 售出比率
+
+        return account;
     }
 
     /**
