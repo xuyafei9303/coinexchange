@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashWithdrawAuditRecord;
 import com.ixyf.domain.CashWithdrawals;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ixyf.model.CashSellParam;
+
 public interface CashWithdrawalsService extends IService<CashWithdrawals>{
 
 
@@ -38,4 +40,12 @@ public interface CashWithdrawalsService extends IService<CashWithdrawals>{
      * @return
      */
     Page<CashWithdrawals> findUserCashWithdrawals(Page<CashWithdrawals> page, Long userId, Byte status);
+
+    /**
+     * GCN卖出操作
+     * @param userId
+     * @param cashSellParam
+     * @return
+     */
+    boolean sell(Long userId, CashSellParam cashSellParam);
 }

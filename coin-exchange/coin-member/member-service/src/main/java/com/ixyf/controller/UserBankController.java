@@ -3,6 +3,9 @@ package com.ixyf.controller;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.UserBank;
+import com.ixyf.dto.UserBankDto;
+import com.ixyf.feign.UserBankServiceFeign;
+import com.ixyf.mappers.UserBankDtoMapper;
 import com.ixyf.model.R;
 import com.ixyf.service.UserBankService;
 import io.swagger.annotations.Api;
@@ -20,7 +23,7 @@ import javax.annotation.Resource;
 @RestController
 @Api(tags = "用户银行卡管理")
 @RequestMapping("/userBanks")
-public class UserBankController {
+public class UserBankController implements UserBankServiceFeign {
 
     @Resource
     private UserBankService userBankService;
@@ -89,5 +92,12 @@ public class UserBankController {
             return R.ok();
         }
         return R.fail("绑定银行卡失败");
+    }
+
+    @Override
+    public UserBankDto getUserBankInfo(Long userId) {
+        UserBank currentUserBank = userBankService.getCurrentUserBank(userId);
+        UserBankDto userBankDto = UserBankDtoMapper.INSTANCE.toConvertDto(currentUserBank);
+        return userBankDto;
     }
 }

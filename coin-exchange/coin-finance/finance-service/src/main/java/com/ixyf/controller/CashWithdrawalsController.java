@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRecharge;
 import com.ixyf.domain.CashWithdrawAuditRecord;
 import com.ixyf.domain.CashWithdrawals;
+import com.ixyf.model.CashSellParam;
 import com.ixyf.model.R;
 import com.ixyf.service.CashWithdrawalsService;
 import com.ixyf.utils.ReportCsvUtils;
@@ -170,5 +171,20 @@ public class CashWithdrawalsController {
         Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         Page<CashWithdrawals> withdrawalsPage = cashWithdrawalsService.findUserCashWithdrawals(page, userId, status);
         return R.ok(withdrawalsPage);
+    }
+
+    @PostMapping("/sell")
+    @ApiOperation(value = "GCN卖出")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cashSellParam", value = "cashSellParam json")
+    })
+    public R sell(@RequestBody @Validated CashSellParam cashSellParam) {
+
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean sell = cashWithdrawalsService.sell(userId, cashSellParam);
+        if (sell) {
+            return R.ok("提交申请成功");
+        }
+        return R.fail("提交卖出申请失败");
     }
 }

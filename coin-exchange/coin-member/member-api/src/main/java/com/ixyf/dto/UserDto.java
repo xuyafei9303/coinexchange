@@ -61,4 +61,8 @@ public class UserDto {
     @TableField(value = "real_name")
     @ApiModelProperty(value="真实姓名")
     private String realName;
+
+    @TableField(exist = false)
+    @ApiModelProperty(value = "支付密码")
+    private String payPassword;
 }
