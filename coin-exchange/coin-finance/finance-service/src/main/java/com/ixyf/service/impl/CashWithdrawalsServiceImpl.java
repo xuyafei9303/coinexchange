@@ -142,4 +142,17 @@ public class CashWithdrawalsServiceImpl extends ServiceImpl<CashWithdrawalsMappe
         });
         return false;
     }
+
+    /**
+     * 查询当前用户的提现记录
+     *
+     * @param page
+     * @param userId
+     * @param status
+     * @return
+     */
+    @Override
+    public Page<CashWithdrawals> findUserCashWithdrawals(Page<CashWithdrawals> page, Long userId, Byte status) {
+        return page(page, new LambdaQueryWrapper<CashWithdrawals>().eq(CashWithdrawals::getUserId, userId).eq(status != null, CashWithdrawals::getStatus, status));
+    }
 }
