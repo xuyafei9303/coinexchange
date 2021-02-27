@@ -2,6 +2,7 @@ package com.ixyf.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRecharge;
+import com.ixyf.domain.CashWithdrawAuditRecord;
 import com.ixyf.domain.CashWithdrawals;
 import com.ixyf.model.R;
 import com.ixyf.service.CashWithdrawalsService;
@@ -10,10 +11,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.supercsv.cellprocessor.CellProcessorAdaptor;
@@ -146,5 +147,15 @@ public class CashWithdrawalsController {
                 e.printStackTrace();
             }
         }
+    }
+
+    @PostMapping("/updateWithdrawalsStatus")
+    public R updateCashWithdrawalsStatus(@RequestBody @Validated CashWithdrawAuditRecord cashWithdrawAuditRecord) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean update = cashWithdrawalsService.updateWithdrawalsStatus(userId, cashWithdrawAuditRecord);
+        if (update) {
+            return R.ok();
+        }
+        return R.fail("审核失败");
     }
 }

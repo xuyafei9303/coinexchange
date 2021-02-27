@@ -18,4 +18,19 @@ public interface AccountService extends IService<Account>{
      * @return
      */
     boolean transferAccount(Long adminId, Long userId, Long coinId, Long orderNum, BigDecimal num, BigDecimal fee, String remark, String businessType, Byte direction);
+
+    /**
+     * 给用户扣减钱
+     * @param adminId
+     * @param userId
+     * @param coinId
+     * @param orderNum
+     * @param num
+     * @param fee
+     * @param remark
+     * @param businessType
+     * @param direction
+     * @return
+     */
+    boolean decreaseAccountAmount(Long adminId, Long userId, Long coinId, Long orderNum, BigDecimal num, BigDecimal fee, String remark, String businessType, Byte direction);
 }

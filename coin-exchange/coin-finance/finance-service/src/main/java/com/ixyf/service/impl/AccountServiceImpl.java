@@ -19,6 +19,52 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private AccountDetailService accountDetailService;
 
     /**
+     * 给用户扣减钱
+     *
+     * @param adminId
+     * @param userId
+     * @param coinId
+     * @param orderNum
+     * @param num
+     * @param fee
+     * @param remark
+     * @param businessType
+     * @param direction
+     * @return
+     */
+    @Override
+    public boolean decreaseAccountAmount(Long adminId, Long userId, Long coinId, Long orderNum, BigDecimal num, BigDecimal fee, String remark, String businessType, Byte direction) {
+
+        Account coinAccount = getCoinAccount(coinId, userId);
+        if (coinAccount == null) {
+            throw new IllegalArgumentException("账户不存在");
+        }
+        AccountDetail accountDetail = new AccountDetail();
+        accountDetail.setCoinId(coinId);
+        accountDetail.setUserId(userId);
+        accountDetail.setAmount(num);
+        accountDetail.setFee(fee);
+        accountDetail.setAccountId(coinAccount.getId());
+        accountDetail.setRefAccountId(coinAccount.getId());
+        accountDetail.setRemark(remark);
+        accountDetail.setBusinessType(businessType);
+        accountDetail.setDirection(direction);
+
+        boolean save = accountDetailService.save(accountDetail);
+        if (save) { // 新增流水记录
+            BigDecimal balanceAmount = coinAccount.getBalanceAmount();
+            BigDecimal decimal = balanceAmount.add(num.multiply(BigDecimal.valueOf(-1)));
+            if (decimal.compareTo(BigDecimal.ZERO) > 0) {
+                coinAccount.setBalanceAmount(decimal);
+                return updateById(coinAccount);
+            } else {
+                throw new IllegalArgumentException("余额不足");
+            }
+        }
+        return false;
+    }
+
+    /**
      * 审核通过 进行转账
      *
      * @param adminId
