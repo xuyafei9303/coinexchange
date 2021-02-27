@@ -3,6 +3,8 @@ package com.ixyf.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRecharge;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ixyf.domain.CashRechargeAuditRecord;
+
 public interface CashRechargeService extends IService<CashRecharge>{
 
     /**
@@ -20,4 +22,12 @@ public interface CashRechargeService extends IService<CashRecharge>{
      * @return
      */
     Page<CashRecharge> findByPage(Page<CashRecharge> page, Long coinId, Long userId, String userName, String mobile, Byte status, String numMin, String numMax, String startTime, String endTime);
+
+    /**
+     * 现金充值审核
+     * @param userId 审核人
+     * @param cashRechargeAuditRecord 审核数据
+     * @return
+     */
+    boolean cashRechargeAudit(Long userId, CashRechargeAuditRecord cashRechargeAuditRecord);
 }

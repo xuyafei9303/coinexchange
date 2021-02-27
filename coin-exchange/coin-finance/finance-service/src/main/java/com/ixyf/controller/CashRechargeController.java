@@ -2,14 +2,15 @@ package com.ixyf.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ixyf.domain.CashRecharge;
+import com.ixyf.domain.CashRechargeAuditRecord;
 import com.ixyf.model.R;
 import com.ixyf.service.CashRechargeService;
 import com.ixyf.utils.ReportCsvUtils;
 import io.swagger.annotations.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -172,5 +173,19 @@ public class CashRechargeController {
                 e.printStackTrace();
             }
         }
+    }
+
+    @PostMapping("/cashRechargeUpdateStatus")
+    @ApiOperation(value = "现金充值审核")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "cashRechargeAuditRecord", value = "cashRechargeAuditRecord json")
+    })
+    public R cashRechargeUpdateStatus(@RequestBody @Validated CashRechargeAuditRecord cashRechargeAuditRecord) {
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        boolean update = cashRechargeService.cashRechargeAudit(userId, cashRechargeAuditRecord);
+        if (update) {
+            return R.ok();
+        }
+        return R.fail("审核失败");
     }
 }
